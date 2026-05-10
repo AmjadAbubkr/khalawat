@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}" dir="{{DIR}}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khalawat — Pause</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a1f0d;color:#e8f5e9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.container{max-width:420px;width:100%}
+.ayah-arabic{font-size:2rem;line-height:1.8;color:#fff;margin-bottom:16px;font-family:'Traditional Arabic','Scheherazade New',serif;direction:rtl;unicode-bidi:bidi-override}
+.ayah-translation{font-size:1.1rem;line-height:1.6;color:#a5d6a7;margin-bottom:8px;opacity:0;transition:opacity 1s}
+.ayah-translation.visible{opacity:1}
+.ayah-source{font-size:0.85rem;color:#66bb6a;margin-bottom:32px;font-style:italic}
+.timer-circle{width:140px;height:140px;border-radius:50%;border:4px solid #2e7d32;display:flex;align-items:center;justify-content:center;margin:0 auto 32px;position:relative}
+.timer-circle svg{position:absolute;top:0;left:0;width:100%;height:100%;transform:rotate(-90deg)}
+.timer-circle circle{fill:none;stroke:#4caf50;stroke-width:4;stroke-linecap:round;stroke-dasharray:408;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear}
+.timer-number{font-size:2.5rem;font-weight:700;color:#4caf50}
+.btn-group{display:flex;flex-direction:column;gap:12px;align-items:center}
+.btn{padding:14px 32px;border-radius:12px;font-size:1rem;cursor:pointer;border:none;font-weight:600;transition:all 0.3s;width:100%;max-width:280px}
+.btn-primary{background:#2e7d32;color:#fff}
+.btn-primary:hover{background:#388e3c}
+.btn-primary:disabled{background:#1a3a1a;color:#4a6a4a;cursor:not-allowed}
+.btn-override{background:transparent;color:#5a7a5a;font-size:0.8rem;cursor:pointer;border:none;text-decoration:underline;opacity:0.5;padding:8px}
+.btn-override:disabled{opacity:0.15;cursor:not-allowed;text-decoration:none}
+.message{margin-top:24px;font-size:0.9rem;color:#81c784;opacity:0.8}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="ayah-arabic" id="arabicText">{{ARABIC}}</div>
+  <div class="ayah-translation" id="translationText">{{TRANSLATION}}</div>
+  <div class="ayah-source">{{SOURCE}}</div>
+  <div class="timer-circle">
+    <svg viewBox="0 0 140 140"><circle cx="70" cy="70" r="65" id="progressRing"/></svg>
+    <div class="timer-number" id="timerNum">15</div>
+  </div>
+  <div class="btn-group">
+    <button class="btn btn-primary" id="goBackBtn" disabled>Go Back</button>
+    <button class="btn-override" id="continueBtn" disabled>I still want to proceed</button>
+  </div>
+  <div class="message" id="statusMsg">Take a moment to reflect...</div>
+</div>
+<script>
+const TIMER_SECONDS=15;
+const LANG="{{LANG}}";
+let secondsLeft=TIMER_SECONDS;
+const timerEl=document.getElementById('timerNum');
+const progressRing=document.getElementById('progressRing');
+const goBackBtn=document.getElementById('goBackBtn');
+const continueBtn=document.getElementById('continueBtn');
+const statusMsg=document.getElementById('statusMsg');
+const transEl=document.getElementById('translationText');
+const circumference=2*Math.PI*65;
+progressRing.style.strokeDasharray=circumference;
+progressRing.style.strokeDashoffset=0;
+if(LANG==='ar'){transEl.style.display='none'}
+setTimeout(()=>{transEl.classList.add('visible')},2000);
+const interval=setInterval(()=>{
+  secondsLeft--;
+  timerEl.textContent=secondsLeft;
+  const offset=circumference*(1-secondsLeft/TIMER_SECONDS);
+  progressRing.style.strokeDashoffset=offset;
+  if(secondsLeft<=0){
+    clearInterval(interval);
+    goBackBtn.disabled=false;
+    continueBtn.disabled=false;
+    statusMsg.textContent='You can choose now.';
+    statusMsg.style.opacity='1';
+  }
+},1000);
+goBackBtn.addEventListener('click',()=>{window.history.back()});
+continueBtn.addEventListener('click',()=>{
+  fetch('/stage2?lang='+LANG,{method:'GET'}).then(()=>{window.location.href='/stage2?lang='+LANG}).catch(()=>{window.location.href='/stage2?lang='+LANG});
+});
+</script>
+</body>
+</html>

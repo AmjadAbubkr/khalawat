@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}" dir="{{DIR}}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khalawat — Protected</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#041207;color:#e8f5e9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+.container{max-width:420px;width:100%}
+.lock-icon{font-size:4rem;margin-bottom:24px;opacity:0.8}
+.message-arabic{font-size:1.4rem;color:#a5d6a7;margin-bottom:12px;font-family:'Traditional Arabic','Scheherazade New',serif;direction:rtl;line-height:1.8}
+.message-text{font-size:1.1rem;line-height:1.7;color:#c8e6c9;margin-bottom:32px}
+.timer-display{font-size:3rem;font-weight:700;color:#4caf50;margin-bottom:8px;letter-spacing:2px}
+.timer-label{font-size:0.85rem;color:#81c784;margin-bottom:40px;text-transform:uppercase;letter-spacing:1px}
+.suggestions{display:flex;flex-direction:column;gap:16px;margin-bottom:32px}
+.suggestion-card{background:rgba(46,125,50,0.1);border:1px solid rgba(76,175,80,0.15);border-radius:16px;padding:20px;display:flex;align-items:center;gap:16px;text-align:left;transition:all 0.3s}
+.suggestion-icon{font-size:2rem;min-width:40px;text-align:center}
+.suggestion-text{font-size:1rem;color:#c8e6c9;line-height:1.5}
+.suggestion-text strong{color:#fff;display:block;margin-bottom:2px}
+.btn{padding:16px 32px;border-radius:12px;font-size:1rem;cursor:pointer;border:none;font-weight:600;transition:all 0.3s;width:100%;max-width:280px;margin:0 auto}
+.btn-primary{background:#2e7d32;color:#fff}
+.btn-primary:disabled{background:#1a2a1a;color:#3a5a3a;cursor:not-allowed}
+.unlock-text{font-size:0.85rem;color:#66bb6a;margin-top:16px;opacity:0;transition:opacity 0.5s}
+.unlock-text.visible{opacity:1}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="lock-icon">🔒</div>
+  <div class="message-arabic">أَنْتَ وَضَعْتَ هَذَا الْقَفْلَ لِنَفْسِكَ</div>
+  <div class="message-text">You chose this lock for yourself.<br>It's not punishment — it's protection.</div>
+  <div class="timer-display" id="lockTimer">2:00</div>
+  <div class="timer-label">remaining</div>
+  <div class="suggestions">
+    <div class="suggestion-card">
+      <div class="suggestion-icon">💧</div>
+      <div class="suggestion-text"><strong>Make wudu</strong>Cool water resets the heart</div>
+    </div>
+    <div class="suggestion-card">
+      <div class="suggestion-icon">🚶</div>
+      <div class="suggestion-text"><strong>Leave the room</strong>Change your environment, change your thoughts</div>
+    </div>
+    <div class="suggestion-card">
+      <div class="suggestion-icon">🤲</div>
+      <div class="suggestion-text"><strong>Pray 2 rak'ah</strong>The closest you'll be to Allah</div>
+    </div>
+  </div>
+  <button class="btn btn-primary" id="unlockBtn" disabled>Lock complete. You can proceed.</button>
+  <div class="unlock-text" id="unlockMsg">This lock cannot be bypassed. Use this time wisely.</div>
+</div>
+<script>
+const LOCK_MINUTES=2;
+const LANG="{{LANG}}";
+let totalSeconds=LOCK_MINUTES*60;
+const timerEl=document.getElementById('lockTimer');
+const unlockBtn=document.getElementById('unlockBtn');
+const unlockMsg=document.getElementById('unlockMsg');
+setTimeout(()=>{unlockMsg.classList.add('visible')},5000);
+const interval=setInterval(()=>{
+  totalSeconds--;
+  const m=Math.floor(totalSeconds/60);
+  const s=totalSeconds%60;
+  timerEl.textContent=m+':'+(s<10?'0':'')+s;
+  if(totalSeconds<=0){
+    clearInterval(interval);
+    timerEl.textContent='0:00';
+    unlockBtn.disabled=false;
+  }
+},1000);
+unlockBtn.addEventListener('click',()=>{
+  window.history.back();
+});
+</script>
+</body>
+</html>
