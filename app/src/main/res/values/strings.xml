@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Khalawat</string>
+    <string name="vpn_notification_title">Khalawat is active</string>
+    <string name="vpn_notification_text">Protecting your private moments</string>
+</resources>
