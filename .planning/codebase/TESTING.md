@@ -125,21 +125,7 @@ Android-dependent code (VPN service, Compose UI) is tested via thin shells that 
 
 ## Running Tests
 
-> **Windows users:** Replace `./gradlew` with `gradlew.bat` in all commands below (e.g., `gradlew.bat testDebugUnitTest`).
 
-```bash
-# All unit tests
-./gradlew testDebugUnitTest
-
-# Specific test class
-./gradlew testDebugUnitTest --tests "com.khalawat.android.escalation.EscalationEngineTest"
-
-# With verbose output
-./gradlew testDebugUnitTest --info
-
-# Instrumented tests (requires device/emulator)
-./gradlew connectedAndroidTest
-```
 
 ## CI Integration
 
