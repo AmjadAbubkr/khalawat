@@ -11,6 +11,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
 
 /**
  * Anti-tamper disable screen with 30-sec hold button.
@@ -25,6 +26,18 @@ fun DisableScreen(
     var holdElapsed by remember { mutableStateOf(0L) }
     var pinInput by remember { mutableStateOf("") }
     var pinError by remember { mutableStateOf(false) }
+
+    // Timer that advances hold progress while the hold is active
+    LaunchedEffect(state.isHoldActive) {
+        if (state.isHoldActive) {
+            val startTime = System.currentTimeMillis() - holdElapsed
+            while (state.isHoldActive && !state.isHoldComplete) {
+                delay(100)
+                holdElapsed = System.currentTimeMillis() - startTime
+                state.updateHoldProgress(holdElapsed)
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -80,6 +93,7 @@ fun DisableScreen(
             Button(
                 onClick = {
                     if (!state.isHoldActive) {
+                        holdElapsed = 0L
                         state.startHold()
                     }
                 },
@@ -102,7 +116,7 @@ fun DisableScreen(
                 )
             }
         } else {
-            // Hold complete — companion PIN gate if enabled
+            // Hold complete - companion PIN gate if enabled
             if (state.requiresCompanionPin) {
                 Text("Enter Companion PIN to disable:", fontWeight = FontWeight.Medium)
                 Spacer(modifier = Modifier.height(8.dp))
@@ -150,12 +164,12 @@ fun DisableScreen(
         }
 
         Spacer(modifier = Modifier.height(24.dp))
-
         OutlinedButton(onClick = {
+            holdElapsed = 0L
             state.releaseHold()
             onCancel()
         }) {
-            Text("Go Back — I want to stay protected")
+            Text("Go Back \u2014 I want to stay protected")
         }
     }
 }

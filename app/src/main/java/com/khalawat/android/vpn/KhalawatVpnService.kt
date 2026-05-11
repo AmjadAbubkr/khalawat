@@ -25,9 +25,9 @@ import java.net.InetAddress
  * Android VPN service that intercepts DNS traffic via a TUN interface.
  *
  * Architecture:
- *   TUN → raw IP packet → extract UDP/DNS → DnsResolverCoordinator →
- *     FORWARD: relay to upstream DNS, write response back to TUN
- *     REDIRECT: return 127.0.0.1 (InterventionServer) to TUN
+ * TUN -> raw IP packet -> extract UDP/DNS -> DnsResolverCoordinator ->
+ * FORWARD: relay to upstream DNS, write response back to TUN
+ * REDIRECT: return 127.0.0.1 (InterventionServer) to TUN
  *
  * The heavy logic lives in DnsResolverCoordinator (unit-testable).
  * This class is a thin Android shell: TUN setup + packet loop.
@@ -48,8 +48,7 @@ class KhalawatVpnService : VpnService() {
     private var coordinator: DnsResolverCoordinator? = null
     private var interventionServer: InterventionServer? = null
     private var vpnThread: Thread? = null
-    @Volatile
-    private var running = false
+    @Volatile private var running = false
 
     override fun onCreate() {
         super.onCreate()
@@ -75,14 +74,11 @@ class KhalawatVpnService : VpnService() {
             stopVpn()
             return START_NOT_STICKY
         }
-
         if (vpnInterface != null) return START_STICKY
-
         setupVpn()
         startInterventionServer()
         startPacketLoop()
         startForegroundNotification()
-
         return START_STICKY
     }
 
@@ -133,14 +129,13 @@ class KhalawatVpnService : VpnService() {
                 if (length <= 0) continue
 
                 val packet = buffer.copyOf(length)
-
                 if (!isUdpDnsPacket(packet)) continue
 
                 val dnsPayload = extractDnsPayload(packet) ?: continue
                 val query = DnsQuery(dnsPayload, "8.8.8.8")
                 val coord = coordinator ?: continue
-
                 val result = coord.handleDnsPacket(query)
+
                 when (result.action) {
                     DnsResult.Action.FORWARD -> {
                         val response = forwardDns(dnsPayload)
@@ -169,7 +164,9 @@ class KhalawatVpnService : VpnService() {
             socket.receive(resp)
             socket.close()
             buf.copyOf(resp.length)
-        } catch (e: Exception) { null }
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun isUdpDnsPacket(packet: ByteArray): Boolean {
@@ -189,9 +186,10 @@ class KhalawatVpnService : VpnService() {
             val ihl = (packet[0].toInt() and 0x0F) * 4
             val udpLen = ((packet[ihl + 4].toInt() and 0xFF) shl 8) or (packet[ihl + 5].toInt() and 0xFF)
             val dnsOffset = ihl + 8
-            if (packet.size < dnsOffset) null
-            else packet.copyOfRange(dnsOffset, ihl + udpLen)
-        } catch (e: Exception) { null }
+            if (packet.size < dnsOffset) null else packet.copyOfRange(dnsOffset, ihl + udpLen)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     private fun buildResponsePacket(originalPacket: ByteArray, dnsResponse: ByteArray): ByteArray {
@@ -210,6 +208,19 @@ class KhalawatVpnService : VpnService() {
         response[8] = 64.toByte(); response[9] = 17
         System.arraycopy(dstIp, 0, response, 12, 4)
         System.arraycopy(srcIp, 0, response, 16, 4)
+
+        // Compute IPv4 header checksum (RFC 791)
+        response[10] = 0; response[11] = 0
+        var sum = 0L
+        for (i in 0 until 20 step 2) {
+            sum += ((response[i].toInt() and 0xFF) shl 8) or (response[i + 1].toInt() and 0xFF)
+        }
+        while (sum shr 16 != 0L) {
+            sum = (sum and 0xFFFF) + (sum shr 16)
+        }
+        val checksum = (sum.toInt().inv()) and 0xFFFF
+        response[10] = (checksum shr 8).toByte()
+        response[11] = (checksum and 0xFF).toByte()
 
         // UDP header
         response[20] = (dstPort shr 8).toByte(); response[21] = (dstPort and 0xFF).toByte()
