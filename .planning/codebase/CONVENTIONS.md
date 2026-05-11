@@ -36,43 +36,47 @@ All code lives under `com.khalawat.android`. Each module has its own package:
 ### Functions
 - Public interface methods: verb or verb phrase (e.g., `onBlockedRequest()`, `override()`, `resolve()`)
 - Private helpers: descriptive (e.g., `persistState()`, `extractDomain()`, `escapeHtml()`)
+- Mutator methods on state machines: descriptive verb (e.g., `enableCompanionPin()`, `updateParentMessage()`, `changeLanguage()` — NOT `setCompanionPinEnabled()` which clashes with Compose delegate setters)
 
 ### Variables
-- Private mutable state: prefixed with underscore (e.g., `_isHoldActive`, `_holdProgress`)
-- Public read-only access: no underscore (e.g., `isHoldActive`, `holdProgress`)
+- Compose `mutableStateOf` delegates: no underscore, `by mutableStateOf(...)` with `private set` (e.g., `var isHoldActive: Boolean by mutableStateOf(false) private set`)
+- Private backing fields (non-Compose): prefixed with underscore (e.g., `_companionPin: String?`)
 - Compose-local state: `by remember { mutableStateOf(...) }` (e.g., `holdElapsed`, `pinInput`)
 
 ## Architecture Patterns
 
 ### Interface-Implementation Separation
-
 Every module exposes a pure Kotlin interface with no Android dependencies:
-
 ```kotlin
 interface DnsProxy {
     fun resolve(query: DnsQuery): DnsResponse
 }
 ```
-
 Implementation classes depend on Android where needed; interfaces stay testable.
 
 ### Testable Logic Core
-
 Android-dependent code is split into:
 1. **Thin Android shell** — handles lifecycle, permissions, system APIs (e.g., `KhalawatVpnService`)
 2. **Pure logic core** — fully unit-testable (e.g., `DnsResolverCoordinator`)
 
-### State Machines
+### State Machines with Compose Observability
+UI state is driven by state machines that use `mutableStateOf` for Compose observability:
 
-UI state is driven by pure-logic state machines with no Compose dependency:
-- `OnboardingState` — drives `OnboardingFlow` Compose UI
-- `AntiTamperState` — drives `DisableScreen` Compose UI
-- `EscalationEngine` — drives intervention server responses
+- `OnboardingState` — 7 `mutableStateOf` properties (currentScreen, companionPinEnabled, companionPin, vpnPermissionGranted, isComplete, parentMessage, selectedLanguage)
+- `AntiTamperState` — 5 `mutableStateOf`/`mutableFloatStateOf`/`mutableIntStateOf` properties (isHoldActive, holdProgress, isHoldComplete, requiresCompanionPin, disconnectCount)
+- `EscalationEngine` — plain interface (no Compose observability needed; consumed by VPN service, not Compose UI)
 
-**Important**: State machines use plain `var` properties (not `mutableStateOf`) to maintain zero Compose dependencies and full unit-testability. Compose consumers bridge the gap via:
-- Local `mutableStateOf` variables in Composables (e.g., `holdElapsed` in `DisableScreen`)
-- `LaunchedEffect` timers that sync external state → Compose state (e.g., calling `updateHoldProgress()`)
-- Parent state changes that trigger recomposition
+**Why `mutableStateOf` in state machines?** `compose-runtime` is a pure-JVM library — classes remain fully unit-testable without Android dependencies. Compose consumers can directly observe state changes without bridging code. This eliminates the previous pattern of local `mutableStateOf` variables + `LaunchedEffect` timers to sync external state → Compose state.
+
+**JVM signature clash avoidance**: When using `mutableStateOf` with `private set`, the Compose compiler generates delegate setters named `setXxx`. Do NOT name explicit methods `setXxx` — they'll clash with the delegate. Instead, use descriptive verbs (e.g., `enableCompanionPin`, `updateParentMessage`, `changeLanguage`).
+
+### Reactive Navigation with derivedStateOf
+`KhalawatApp` uses `derivedStateOf` to compute `showOnboarding` from both persisted state (`isOnboardingComplete` from prefs) and live state (`onboardingState.isComplete`). This eliminates imperative flag-setting and race conditions:
+```kotlin
+val showOnboarding by remember {
+    derivedStateOf { !isOnboardingComplete && !onboardingState.isComplete }
+}
+```
 
 ### Repository Pattern
 - `SessionRepository` interface for persistence
@@ -112,9 +116,7 @@ All dynamic content inserted into HTML templates must be escaped via `escapeHtml
 ## Compose UI Conventions
 
 ### Screen Structure
-
 Each screen is a `@Composable` function:
-
 ```kotlin
 @Composable
 fun DashboardScreen(
@@ -135,8 +137,9 @@ fun DashboardScreen(
 ### Timers in Compose
 - Use `LaunchedEffect(key)` to start/stop timers
 - `delay(intervalMs)` inside a `while` loop for periodic updates
-- Key on the condition that starts/stops the timer (e.g., `state.isHoldActive`)
-- Timer logic delegates to the state machine (`updateHoldProgress()`); Composable only bridges
+- Key on the Compose-observable property that starts/stops the timer (e.g., `state.isHoldActive`)
+- Timer logic delegates to the state machine (`updateHoldProgress()`); Composable only bridges elapsed time
+- **Important**: The `LaunchedEffect` key MUST be a `mutableStateOf` property on the state machine, not a plain backing field — otherwise Compose won't observe the change and the effect won't relaunch
 
 ### Theming
 - Islamic green color scheme defined in `Color.kt` and `Theme.kt`

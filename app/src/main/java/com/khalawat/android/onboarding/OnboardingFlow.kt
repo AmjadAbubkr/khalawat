@@ -2,14 +2,18 @@ package com.khalawat.android.onboarding
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -137,8 +141,9 @@ private fun HowItWorksScreen() {
 
 @Composable
 private fun CompanionPinScreen(state: OnboardingState) {
-    var pinInput by remember { mutableStateOf("") }
-    var parentMsg by remember { mutableStateOf("") }
+    // Finding #6: rememberSaveable preserves values across config changes
+    var pinInput by rememberSaveable { mutableStateOf("") }
+    var parentMsg by rememberSaveable { mutableStateOf("") }
 
     Text("Companion PIN", fontSize = 28.sp, fontWeight = FontWeight.Bold)
     Spacer(modifier = Modifier.height(16.dp))
@@ -175,7 +180,12 @@ private fun CompanionPinScreen(state: OnboardingState) {
             },
             label = { Text("4-digit PIN") },
             modifier = Modifier.fillMaxWidth(0.6f),
-            singleLine = true
+            singleLine = true,
+            // Finding #5: Mask PIN input and show numeric password keyboard
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.NumberPassword
+            )
         )
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(

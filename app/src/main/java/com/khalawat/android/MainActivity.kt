@@ -73,9 +73,12 @@ class MainActivity : ComponentActivity() {
 
     private fun onVpnPermissionGranted() {
         onboardingState.grantVpnPermission()
-        onboardingState.changeLanguage(
+        val safeLanguage = try {
             com.khalawat.android.content.Language.valueOf(prefs.selectedLanguage)
-        )
+        } catch (_: IllegalArgumentException) {
+            com.khalawat.android.content.Language.EN
+        }
+        onboardingState.changeLanguage(safeLanguage)
         prefs.isOnboardingComplete = true
         prefs.companionPin = onboardingState.companionPin
         prefs.parentMessage = onboardingState.parentMessage

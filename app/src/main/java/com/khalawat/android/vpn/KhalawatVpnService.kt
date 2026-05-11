@@ -5,6 +5,7 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
+import android.util.Log
 import com.khalawat.android.blocklist.BlocklistStoreImpl
 import com.khalawat.android.dns.DnsProxy
 import com.khalawat.android.dns.DnsProxyImpl
@@ -25,9 +26,9 @@ import java.net.InetAddress
  * Android VPN service that intercepts DNS traffic via a TUN interface.
  *
  * Architecture:
- * TUN -> raw IP packet -> extract UDP/DNS -> DnsResolverCoordinator ->
- * FORWARD: relay to upstream DNS, write response back to TUN
- * REDIRECT: return 127.0.0.1 (InterventionServer) to TUN
+ *   TUN -> raw IP packet -> extract UDP/DNS -> DnsResolverCoordinator ->
+ *     FORWARD: relay to upstream DNS, write response back to TUN
+ *     REDIRECT: return 127.0.0.1 (InterventionServer) to TUN
  *
  * The heavy logic lives in DnsResolverCoordinator (unit-testable).
  * This class is a thin Android shell: TUN setup + packet loop.
@@ -42,13 +43,16 @@ class KhalawatVpnService : VpnService() {
         const val ACTION_STOP = "com.khalawat.android.action.STOP_VPN"
         const val NOTIFICATION_CHANNEL_ID = "khalawat_vpn"
         const val NOTIFICATION_ID = 1
+        private const val TAG = "KhalawatVpn"
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
     private var coordinator: DnsResolverCoordinator? = null
     private var interventionServer: InterventionServer? = null
     private var vpnThread: Thread? = null
-    @Volatile private var running = false
+
+    @Volatile
+    private var running = false
 
     override fun onCreate() {
         super.onCreate()
@@ -75,7 +79,15 @@ class KhalawatVpnService : VpnService() {
             return START_NOT_STICKY
         }
         if (vpnInterface != null) return START_STICKY
+
+        // Finding #10: Handle Builder.establish() returning null
         setupVpn()
+        if (vpnInterface == null) {
+            Log.e(TAG, "VPN establishment failed — Builder.establish() returned null")
+            stopSelf()
+            return START_NOT_STICKY
+        }
+
         startInterventionServer()
         startPacketLoop()
         startForegroundNotification()
@@ -134,8 +146,8 @@ class KhalawatVpnService : VpnService() {
                 val dnsPayload = extractDnsPayload(packet) ?: continue
                 val query = DnsQuery(dnsPayload, "8.8.8.8")
                 val coord = coordinator ?: continue
-                val result = coord.handleDnsPacket(query)
 
+                val result = coord.handleDnsPacket(query)
                 when (result.action) {
                     DnsResult.Action.FORWARD -> {
                         val response = forwardDns(dnsPayload)
@@ -149,22 +161,25 @@ class KhalawatVpnService : VpnService() {
                 }
             }
         } catch (e: Exception) {
-            if (running) e.printStackTrace()
+            if (running) Log.e(TAG, "Packet loop error", e)
         }
     }
 
+    // Finding #9: Wrap DatagramSocket in .use {} to prevent leak on exception.
+    // Also: log DNS forwarding failures instead of silently swallowing.
     private fun forwardDns(query: ByteArray): ByteArray? {
         return try {
-            val socket = DatagramSocket()
-            protect(socket)
-            socket.send(DatagramPacket(query, query.size, InetAddress.getByName("8.8.8.8"), 53))
-            val buf = ByteArray(1500)
-            val resp = DatagramPacket(buf, buf.size)
-            socket.soTimeout = 5000
-            socket.receive(resp)
-            socket.close()
-            buf.copyOf(resp.length)
+            DatagramSocket().use { socket ->
+                protect(socket)
+                socket.send(DatagramPacket(query, query.size, InetAddress.getByName("8.8.8.8"), 53))
+                val buf = ByteArray(1500)
+                val resp = DatagramPacket(buf, buf.size)
+                socket.soTimeout = 5000
+                socket.receive(resp)
+                buf.copyOf(resp.length)
+            }
         } catch (e: Exception) {
+            Log.w(TAG, "DNS forwarding failed", e)
             null
         }
     }
@@ -198,9 +213,9 @@ class KhalawatVpnService : VpnService() {
         val dstIp = originalPacket.copyOfRange(16, 20)
         val srcPort = ((originalPacket[ihl].toInt() and 0xFF) shl 8) or (originalPacket[ihl + 1].toInt() and 0xFF)
         val dstPort = ((originalPacket[ihl + 2].toInt() and 0xFF) shl 8) or (originalPacket[ihl + 3].toInt() and 0xFF)
-
         val udpLen = 8 + dnsResponse.size
         val totalLen = 20 + udpLen
+
         val response = ByteArray(totalLen)
 
         // IP header
@@ -215,9 +230,7 @@ class KhalawatVpnService : VpnService() {
         for (i in 0 until 20 step 2) {
             sum += ((response[i].toInt() and 0xFF) shl 8) or (response[i + 1].toInt() and 0xFF)
         }
-        while (sum shr 16 != 0L) {
-            sum = (sum and 0xFFFF) + (sum shr 16)
-        }
+        while (sum shr 16 != 0L) { sum = (sum and 0xFFFF) + (sum shr 16) }
         val checksum = (sum.toInt().inv()) and 0xFFFF
         response[10] = (checksum shr 8).toByte()
         response[11] = (checksum and 0xFF).toByte()
@@ -229,13 +242,13 @@ class KhalawatVpnService : VpnService() {
 
         // DNS payload
         System.arraycopy(dnsResponse, 0, response, 28, dnsResponse.size)
+
         return response
     }
 
     private fun buildDnsResponse(originalPacket: ByteArray, redirectIp: InetAddress?): ByteArray {
         val ihl = (originalPacket[0].toInt() and 0x0F) * 4
         val dnsQuery = originalPacket.copyOfRange(ihl + 8, originalPacket.size)
-
         val dnsResponse = ByteArray(dnsQuery.size + 16)
         System.arraycopy(dnsQuery, 0, dnsResponse, 0, dnsQuery.size)
         dnsResponse[2] = (dnsResponse[2].toInt() or 0x80).toByte() // QR=1
