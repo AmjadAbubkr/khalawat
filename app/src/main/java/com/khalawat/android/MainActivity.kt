@@ -72,7 +72,7 @@ class MainActivity : ComponentActivity() {
 
     private fun onVpnPermissionGranted() {
         onboardingState.grantVpnPermission()
-        onboardingState.setSelectedLanguage(
+        onboardingState.changeLanguage(
             com.khalawat.android.content.Language.valueOf(prefs.selectedLanguage)
         )
         prefs.isOnboardingComplete = true

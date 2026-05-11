@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Khalawat-v1.0.0-2E7D32?style=for-the-badge&labelColor=1B5E20&color=4CAF50" alt="Khalawat">
-  <img src="https://img.shields.io/badge/tests-109%20passing-4CAF50?style=for-the-badge&labelColor=2E7D32" alt="Tests">
-  <img src="https://img.shields.io/badge/platform-Android%207.0%2B-3DDC84?style=for-the-badge&labelColor=1B5E20&logo=android" alt="Platform">
-  <img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge&labelColor=1565C0" alt="License">
+<img src="https://img.shields.io/badge/Khalawat-v1.0.0-2E7D32?style=for-the-badge&labelColor=1B5E20&color=4CAF50" alt="Khalawat">
+<img src="https://img.shields.io/badge/tests-115%20passing-4CAF50?style=for-the-badge&labelColor=2E7D32" alt="Tests">
+<img src="https://img.shields.io/badge/platform-Android%207.0%2B-3DDC84?style=for-the-badge&labelColor=1B5E20&logo=android" alt="Platform">
+<img src="https://img.shields.io/badge/license-MIT-blue?style=for-the-badge&labelColor=1565C0" alt="License">
 </p>
 
 # خَلَاوَة — Khalawat
@@ -41,18 +41,19 @@ When you try to access a blocked domain, Khalawat doesn't just block it. It prov
 
 ```
 Browser/App → DNS query → TUN Interface → KhalawatVpnService
-    → DnsResolverCoordinator (logic core)
-        → DnsProxy (blocklist check)
-            → Blocked? → EscalationEngine → InterventionServer (127.0.0.1:8080)
-            → Allowed? → Forward to 8.8.8.8
+  → DnsResolverCoordinator (logic core)
+    → DnsProxy (blocklist check)
+      → Blocked? → EscalationEngine → InterventionServer (127.0.0.1:8080)
+      → Allowed? → Forward to 8.8.8.8
 ```
 
 ### Key Design Decisions
-
 - **DNS-only VPN** — zero impact on non-DNS traffic, privacy promise holds
 - **Local intervention server** — NanoHTTPD embedded in VPN process, serves HTML pages
-- **Plain HTML/CSS/JS** — intervention pages bundled in APK, no UI dependency
+- **XSS-safe template rendering** — all dynamic content HTML-escaped before insertion
+- **RFC 791 IPv4 checksums** — synthetic DNS responses have valid headers
 - **Testable logic core** — `DnsResolverCoordinator` separates VPN shell from testable logic
+- **Compose-observable state** — `OnboardingState` uses `mutableStateOf` for live UI updates
 - **Room persistence** — escalation state survives process death
 
 ## 📱 Features
@@ -85,7 +86,7 @@ Browser/App → DNS query → TUN Interface → KhalawatVpnService
 
 ## 🧪 Testing
 
-**109 unit tests, 0 failures** — strict TDD (RED→GREEN→REFACTOR) per module.
+**115 unit tests, 0 failures** — strict TDD (RED→GREEN→REFACTOR) per module.
 
 | Module | Tests | What's Tested |
 |--------|-------|---------------|
@@ -97,7 +98,7 @@ Browser/App → DNS query → TUN Interface → KhalawatVpnService
 | SessionRepository | 8 | Save/load state, override logging |
 | DnsProxy | 8 | DNS parsing, blocklist integration |
 | BlocklistStore | 9 | Load, query, size, edge cases |
-| InterventionServer | 6 | HTML serving per stage + language |
+| InterventionServer | 12 | HTML serving per stage, language, XSS escaping |
 
 ```bash
 # Run all tests
@@ -113,6 +114,7 @@ Browser/App → DNS query → TUN Interface → KhalawatVpnService
 |-----------|-----------|
 | Language | Kotlin 2.1.0 |
 | UI | Jetpack Compose + Material3 |
+| State | Compose Runtime (mutableStateOf) |
 | VPN | Android VpnService (DNS-only TUN) |
 | DNS Proxy | Custom Kotlin implementation |
 | HTTP Server | NanoHTTPD 2.3.1 |
@@ -126,18 +128,18 @@ Browser/App → DNS query → TUN Interface → KhalawatVpnService
 
 ```
 app/src/main/java/com/khalawat/android/
-├── MainActivity.kt              # Entry: wires onboarding→dashboard→disable
-├── KhalawatPreferences.kt       # SharedPreferences wrapper
-├── antitamper/                  # 30-sec hold + PIN gate
-├── blocklist/                   # Domain blocklist (load + query)
-├── content/                     # Spiritual content rotation (6 languages)
-├── dns/                         # DNS proxy + packet parsing
-├── escalation/                  # 3-stage + cooling state machine
-├── onboarding/                  # 5-screen first-run flow
-├── persistence/                 # Room DB + session repository
-├── server/                      # NanoHTTPD intervention server
-├── ui/                          # Dashboard + theme
-└── vpn/                         # VPN service + coordinator
+├── MainActivity.kt           # Entry: wires onboarding→dashboard→disable
+├── KhalawatPreferences.kt    # SharedPreferences wrapper
+├── antitamper/               # 30-sec hold + PIN gate
+├── blocklist/                # Domain blocklist (load + query)
+├── content/                  # Spiritual content rotation (6 languages)
+├── dns/                      # DNS proxy + packet parsing
+├── escalation/               # 3-stage + cooling state machine
+├── onboarding/               # 5-screen first-run flow
+├── persistence/              # Room DB + session repository
+├── server/                   # NanoHTTPD intervention server
+├── ui/                       # Dashboard + theme
+└── vpn/                      # VPN service + coordinator
 ```
 
 ## 🔒 Privacy Guarantees
@@ -147,6 +149,7 @@ app/src/main/java/com/khalawat/android/
 | No traffic logged | VPN only intercepts DNS. No HTTP/HTTPS inspection. |
 | No data sent anywhere | Blocklist is local. DNS forwarding uses 8.8.8.8. |
 | No user accounts | No sign-up. No cloud. No analytics. |
+| XSS-safe intervention pages | All dynamic content HTML-escaped before rendering. |
 | Source auditable | Open source. Anyone can verify. |
 
 ## 🗺️ Roadmap
@@ -170,7 +173,7 @@ This is a sadaqah project. Contributions are welcome:
 2. Create a feature branch (`git checkout -b feature/amazing`)
 3. Write tests first (TDD)
 4. Make your changes
-5. Ensure all 109 tests pass (`./gradlew testDebugUnitTest`)
+5. Ensure all 115 tests pass (`./gradlew testDebugUnitTest`)
 6. Open a Pull Request
 
 ## 📄 License

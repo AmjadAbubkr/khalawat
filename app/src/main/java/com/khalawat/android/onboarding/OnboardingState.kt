@@ -1,5 +1,8 @@
 package com.khalawat.android.onboarding
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.khalawat.android.content.Language
 
 enum class OnboardingScreen {
@@ -12,32 +15,32 @@ enum class OnboardingScreen {
 
 /**
  * State machine driving the 5-screen onboarding flow.
- * Pure logic — fully unit-testable, no Android dependencies.
+ * Uses Compose mutableStateOf so that Composables recompose on changes.
+ * compose-runtime is a pure-JVM library — this class remains unit-testable.
  */
 class OnboardingState {
-
     private val screens = OnboardingScreen.entries
     private var currentIndex: Int = 0
 
-    var currentScreen: OnboardingScreen = screens[0]
+    var currentScreen: OnboardingScreen by mutableStateOf(screens[0])
         private set
 
-    var companionPinEnabled: Boolean = false
+    var companionPinEnabled: Boolean by mutableStateOf(false)
         private set
 
-    var companionPin: String? = null
+    var companionPin: String? by mutableStateOf(null)
         private set
 
-    var vpnPermissionGranted: Boolean = false
+    var vpnPermissionGranted: Boolean by mutableStateOf(false)
         private set
 
-    var isComplete: Boolean = false
+    var isComplete: Boolean by mutableStateOf(false)
         private set
 
-    var parentMessage: String = ""
+    var parentMessage: String by mutableStateOf("")
         private set
 
-    var selectedLanguage: Language = Language.EN
+    var selectedLanguage: Language by mutableStateOf(Language.EN)
         private set
 
     fun next() {
@@ -54,7 +57,7 @@ class OnboardingState {
         }
     }
 
-    fun setCompanionPinEnabled(enabled: Boolean) {
+    fun enableCompanionPin(enabled: Boolean) {
         companionPinEnabled = enabled
         if (!enabled) {
             companionPin = null
@@ -76,11 +79,11 @@ class OnboardingState {
         return true
     }
 
-    fun setParentMessage(message: String) {
+    fun updateParentMessage(message: String) {
         parentMessage = message
     }
 
-    fun setSelectedLanguage(language: Language) {
+    fun changeLanguage(language: Language) {
         selectedLanguage = language
     }
 

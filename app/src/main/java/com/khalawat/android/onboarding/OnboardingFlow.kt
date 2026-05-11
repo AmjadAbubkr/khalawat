@@ -159,7 +159,7 @@ private fun CompanionPinScreen(state: OnboardingState) {
         Spacer(modifier = Modifier.width(8.dp))
         Switch(
             checked = state.companionPinEnabled,
-            onCheckedChange = { state.setCompanionPinEnabled(it) }
+            onCheckedChange = { state.enableCompanionPin(it) }
         )
     }
 
@@ -182,7 +182,7 @@ private fun CompanionPinScreen(state: OnboardingState) {
             value = parentMsg,
             onValueChange = {
                 parentMsg = it
-                state.setParentMessage(it)
+                state.updateParentMessage(it)
             },
             label = { Text("Custom message from parent") },
             modifier = Modifier.fillMaxWidth(0.8f),

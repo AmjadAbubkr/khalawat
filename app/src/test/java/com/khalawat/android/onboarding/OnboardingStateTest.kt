@@ -9,7 +9,7 @@ import org.junit.Test
  *
  * Tests the OnboardingState (state machine) that drives the 5-screen
  * onboarding flow. Compose UI consumes this state; the state machine
- * itself is pure logic and fully unit-testable.
+ * uses mutableStateOf so Composables recompose on changes.
  */
 class OnboardingStateTest {
 
@@ -82,13 +82,13 @@ class OnboardingStateTest {
 
     @Test
     fun `enable companion pin`() {
-        state.setCompanionPinEnabled(true)
+        state.enableCompanionPin(true)
         assertThat(state.companionPinEnabled).isTrue()
     }
 
     @Test
     fun `set companion pin code`() {
-        state.setCompanionPinEnabled(true)
+        state.enableCompanionPin(true)
         state.setCompanionPin("1234")
         assertThat(state.companionPin).isEqualTo("1234")
     }
@@ -101,21 +101,21 @@ class OnboardingStateTest {
 
     @Test
     fun `companion pin must be 4 digits`() {
-        state.setCompanionPinEnabled(true)
+        state.enableCompanionPin(true)
         assertThat(state.setCompanionPin("12")).isFalse()
         assertThat(state.companionPin).isNull()
     }
 
     @Test
     fun `companion pin accepts valid 4-digit code`() {
-        state.setCompanionPinEnabled(true)
+        state.enableCompanionPin(true)
         assertThat(state.setCompanionPin("5678")).isTrue()
         assertThat(state.companionPin).isEqualTo("5678")
     }
 
     @Test
     fun `companion pin rejects non-numeric`() {
-        state.setCompanionPinEnabled(true)
+        state.enableCompanionPin(true)
         assertThat(state.setCompanionPin("abcd")).isFalse()
         assertThat(state.companionPin).isNull()
     }
@@ -147,8 +147,8 @@ class OnboardingStateTest {
 
     @Test
     fun `set parent message`() {
-        state.setCompanionPinEnabled(true)
-        state.setParentMessage("Remember Allah is watching")
+        state.enableCompanionPin(true)
+        state.updateParentMessage("Remember Allah is watching")
         assertThat(state.parentMessage).isEqualTo("Remember Allah is watching")
     }
 
@@ -161,7 +161,7 @@ class OnboardingStateTest {
 
     @Test
     fun `set language preference`() {
-        state.setSelectedLanguage(com.khalawat.android.content.Language.AR)
+        state.changeLanguage(com.khalawat.android.content.Language.AR)
         assertThat(state.selectedLanguage).isEqualTo(com.khalawat.android.content.Language.AR)
     }
 }

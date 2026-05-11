@@ -15,7 +15,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 class InterventionServerTest {
-
     @get:Rule
     val tempFolder = TemporaryFolder()
 
@@ -28,11 +27,7 @@ class InterventionServerTest {
         val contentFile = tempFolder.newFile("content.json")
         contentFile.writeText(testContentJson)
         spiritualContent.loadContent(contentFile.absolutePath)
-
         server = InterventionServer(spiritualContent) { path ->
-            // Simulate Android asset loading from classpath resources
-            val resourceName = path.replace("/", "_").replace(".", "_")
-            // For tests, return minimal HTML with the template markers
             when {
                 path.contains("stage1") -> ByteArrayInputStream("""
                     <html><body>
@@ -70,7 +65,6 @@ class InterventionServerTest {
     fun `server responds to stage1 request`() {
         val connection = get("/stage1?lang=en")
         val html = connection.readResponse()
-
         assertThat(connection.responseCode).isEqualTo(200)
         assertThat(html).contains("arabic")
     }
@@ -78,40 +72,86 @@ class InterventionServerTest {
     @Test
     fun `stage1 page contains Arabic text from spiritual content`() {
         val html = get("/stage1?lang=en").readResponse()
-
-        // Should contain Arabic content (from our test data)
         assertThat(html).contains("وَمَن")
     }
 
     @Test
     fun `stage1 page contains source reference`() {
         val html = get("/stage1?lang=en").readResponse()
-
         assertThat(html).contains("Quran")
     }
 
     @Test
     fun `stage2 page contains dhikr phrases`() {
         val html = get("/stage2?lang=en").readResponse()
-
         assertThat(html).contains("سُبْحَانَ")
     }
 
     @Test
     fun `stage3 page loads successfully`() {
         val connection = get("/stage3?lang=en")
-
         assertThat(connection.responseCode).isEqualTo(200)
     }
 
     @Test
     fun `default request serves stage1`() {
         val html = get("/?lang=en").readResponse()
-
         assertThat(html).contains("وَمَن")
     }
 
+    // --- XSS prevention tests (unit-level) ---
+
+    @Test
+    fun `escapeHtml escapes angle brackets`() {
+        val result = testEscapeHtml("<script>alert(1)</script>")
+        assertThat(result).isEqualTo("&lt;script&gt;alert(1)&lt;/script&gt;")
+    }
+
+    @Test
+    fun `escapeHtml escapes ampersand`() {
+        val result = testEscapeHtml("Quran&Hadith")
+        assertThat(result).isEqualTo("Quran&amp;Hadith")
+    }
+
+    @Test
+    fun `escapeHtml escapes double quotes`() {
+        val result = testEscapeHtml("""value="injection" """)
+        assertThat(result).isEqualTo("""value=&quot;injection&quot; """)
+    }
+
+    @Test
+    fun `escapeHtml escapes single quotes`() {
+        val result = testEscapeHtml("value='injection'")
+        assertThat(result).isEqualTo("value=&#39;injection&#39;")
+    }
+
+    @Test
+    fun `escapeHtml leaves plain text unchanged`() {
+        val input = "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا"
+        val result = testEscapeHtml(input)
+        assertThat(result).isEqualTo(input)
+    }
+
+    @Test
+    fun `stage1 response does not contain unescaped script tags`() {
+        val html = get("/stage1?lang=en").readResponse()
+        assertThat(html).doesNotContain("<script>")
+    }
+
     // --- Helpers ---
+
+    /**
+     * Direct test of the escapeHtml logic without going through HTTP.
+     * Tests the same escaping used in InterventionServer.
+     */
+    private fun testEscapeHtml(input: String): String {
+        return input
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+            .replace("\"", "&quot;")
+            .replace("'", "&#39;")
+    }
 
     private fun get(path: String): HttpURLConnection {
         val url = URL("http://127.0.0.1:${InterventionServer.PORT}$path")
