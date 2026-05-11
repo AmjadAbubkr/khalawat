@@ -17,12 +17,12 @@ Android-dependent code (VPN service, Compose UI) is tested via thin shells that 
 | **DnsProxy** | `DnsProxyTest.kt` | 8 | DNS packet parsing, blocklist integration, forwarding |
 | **EscalationEngine** | `EscalationEngineTest.kt` | 11 | Stage progression, override, cooling, idle reset, sliding window |
 | **SpiritualContent** | `SpiritualContentTest.kt` | 10 | Content loading, rotation, language support, reset |
-| **InterventionServer** | `InterventionServerTest.kt` | 6 | HTML serving per stage, language, content injection |
+| **InterventionServer** | `InterventionServerTest.kt` | 12 | HTML serving per stage, language, content injection, XSS escaping |
 | **SessionRepository** | `SessionRepositoryTest.kt` | 8 | Save/load state, override logging, count queries, clear |
 | **DnsResolverCoordinator** | `DnsResolverCoordinatorTest.kt` | 14 | Blocked→redirect, allowed→forward, override, reset, persistence |
 | **OnboardingState** | `OnboardingStateTest.kt` | 22 | Screen navigation, PIN validation, language, VPN permission, completion |
 | **AntiTamperState** | `AntiTamperStateTest.kt` | 21 | Hold progress, completion, PIN gate, disconnect tracking, reminders |
-| **Total** | **9 files** | **109** | |
+| **Total** | **9 files** | **115** | |
 
 ## Test Doubles
 
@@ -78,12 +78,14 @@ Android-dependent code (VPN service, Compose UI) is tested via thin shells that 
 - Content types: ayah, hadith, dhikr
 - Exhaustion: wraps around after all items shown
 
-### InterventionServerTest (6 tests)
+### InterventionServerTest (12 tests)
 - Serve stage1.html for STAGE_1 requests
 - Serve stage2.html for STAGE_2 requests
 - Serve stage3.html for STAGE_3 and COOLING requests
 - Language parameter in URL selects content language
 - Spiritual content injection into HTML templates
+- **XSS prevention**: `escapeHtml()` escapes `<`, `>`, `&`, `"`, `'`
+- No unescaped script tags in server responses
 
 ### SessionRepositoryTest (8 tests)
 - Save and load escalation state
@@ -138,16 +140,18 @@ gradlew.bat connectedAndroidTest
 ```
 
 ## CI Integration
+
 GitHub Actions workflow (`.github/workflows/build.yml`) runs `testDebugUnitTest` on every push. Tests must pass before PR merge.
 
 ## Test Coverage Gaps
 
-| Area | Gap | Reason |
-|------|-----|--------|
-| `KhalawatVpnService` | No unit tests | Android VpnService requires emulator; logic is in `DnsResolverCoordinator` |
-| `RoomSessionRepository` | No unit tests | Room needs Android Context; tested via instrumented tests |
-| `MainActivity` | No unit tests | Compose UI; needs instrumented testing |
-| Compose screens | No unit tests | UI layer; state machines (OnboardingState, AntiTamperState) are fully tested |
-| `KhalawatPreferences` | No unit tests | SharedPreferences wrapper; thin delegation to Android API |
+| Area | Gap | Reason | Priority |
+|------|-----|--------|----------|
+| `KhalawatVpnService` | No unit tests | Android VpnService requires emulator; logic is in `DnsResolverCoordinator` | Low — shell is thin |
+| `RoomSessionRepository` | No unit tests | Room needs Android Context; tested via instrumented tests | Medium — add instrumented tests |
+| `MainActivity` | No unit tests | Compose UI; needs instrumented testing | Low — logic is in state machines |
+| Compose screens | No unit tests | UI layer; state machines are fully tested | Medium — add `ui-test-junit4` tests |
+| `KhalawatPreferences` | No unit tests | SharedPreferences wrapper; thin delegation to Android API | Low — shell is thin |
+| IPv4 checksum | No unit test | In VPN service (no unit tests) | Medium — extract to testable utility |
 
 These gaps are acceptable for MVP — all business logic is tested through pure unit tests. Android shells are thin delegation layers.

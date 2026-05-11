@@ -7,6 +7,8 @@
 - **No external services**: Zero analytics, crash reporting, accounts, or cloud storage.
 - **Local blocklist**: All filtering happens on-device. No data leaves the device.
 - **Local intervention server**: NanoHTTPD binds to `127.0.0.1` only.
+- **XSS prevention**: All template replacements in `InterventionServer` are HTML-escaped via `escapeHtml()`.
+- **IPv4 checksum validity**: `buildResponsePacket()` computes proper RFC 791 checksum so synthetic responses have valid headers.
 - **Open source**: Code is auditable.
 
 ### ⚠️ Concerns
@@ -35,13 +37,20 @@
    - **Mitigation**: Port is localhost-only; risk is limited to co-resident malicious apps
    - **Priority**: Low — standard Android sandboxing limits inter-app access
 
+5. **OnboardingState plain vars not Compose-observable**
+   - `OnboardingState` uses plain `var` properties, not `mutableStateOf`
+   - **Risk**: UI may not recompose when only OnboardingState fields change (no parent state change)
+   - **Mitigation**: Currently works because `onClick` callbacks trigger parent recomposition; fragile long-term
+   - **Priority**: Low — Intentional design trade-off for testability; proper fix is snapshot-state wrappers at Composable layer
+   - **Note**: Same pattern applies to `AntiTamperState` — consumed via `LaunchedEffect` + local `mutableStateOf` in `DisableScreen`
+
 ## Architecture Risks
 
 1. **VPN permission revocation**
    - Android allows users to revoke VPN permission from Settings at any time
    - **Risk**: Protection silently disabled without going through anti-tamper flow
-   - **Mitigation**: Detect VPN disconnect and show reminder notification
-   - **Gap**: No persistent re-prompt on disconnect (only a single notification)
+   - **Mitigation**: `AntiTamperState.recordDisconnect()` + `disconnectCount` in prefs tracks disconnects; `shouldShowDisconnectReminder` after 3+
+   - **Gap**: No persistent re-prompt on disconnect (only count tracking, no auto-restart)
 
 2. **Android process death**
    - Android may kill the VPN service under memory pressure
@@ -59,6 +68,20 @@
    - **Risk**: If 8.8.8.8 is unreachable, all non-blocked DNS fails
    - **Mitigation**: Fall back to device's default DNS resolver
    - **Gap**: No fallback implementation
+
+5. **NanoHTTPD deprecated `parms` API**
+   - `session.parms` is deprecated in NanoHTTPD 2.3.1
+   - **Impact**: Compile warning; may be removed in future NanoHTTPD versions
+   - **Mitigation**: Migrate to `session.parseBody()` + mutable params when upgrading NanoHTTPD
+
+## Resolved Concerns
+
+| Concern | Resolution | Date |
+|---------|-----------|------|
+| ~~Hold timer never advances~~ | Added `LaunchedEffect` timer in `DisableScreen` that calls `updateHoldProgress()` every 100ms | 2026-05-11 |
+| ~~XSS via unescaped template replacements~~ | Added `escapeHtml()` utility; all `.replace()` calls now escape dynamic content | 2026-05-11 |
+| ~~IPv4 header checksum unset~~ | Added RFC 791 one's-complement checksum computation in `buildResponsePacket()` | 2026-05-11 |
+| ~~Deprecated `startActivityForResult`~~ | Replaced with `ActivityResultContracts` in `MainActivity` | 2026-05-11 |
 
 ## Missing Features (Post-MVP)
 
@@ -78,15 +101,12 @@
 
 ## Known Issues
 
-1. **Icon dependency**: `material-icons-extended:1.7.6` is a large dependency (~20MB) for 3 icons. Should migrate to individual icon imports or custom drawables.
-
+1. **Icon dependency**: `material-icons-extended:1.7.6` is a large dependency (~20MB) for 3 icons (`Shield`, `Warning`, `Check`). Should migrate to individual icon modules or custom drawables.
 2. **Arabic text encoding**: Unicode escape sequences used in source files to avoid Windows codepage corruption. This reduces readability for Arabic-literate developers.
-
 3. **No ProGuard rules for NanoHTTPD**: May need keep rules for reflection-based HTTP serving.
-
 4. **Blocklist is static**: Updated only via app updates. No remote update mechanism (by design, for privacy).
-
 5. **No instrumentation tests**: `RoomSessionRepository` and Compose UI screens are not covered by unit tests. Room-backed implementation needs Android Context.
+6. **Color.kt misleading names**: Theme colors are named `Purple80`, `PurpleGrey80`, `Pink80` etc. but actually contain green values (Islamic green color scheme). Cosmetic issue only.
 
 ## Technical Debt
 
@@ -100,3 +120,5 @@
 | Compose UI tests | Add `ui-test-junit4` tests for screens | Medium |
 | Instrumented Room tests | Test `RoomSessionRepository` on device/emulator | Medium |
 | Blocklist encryption | Obfuscate blocklist in APK for production | Medium |
+| Rename Color.kt constants | `Purple80` → `Green900` etc. to match actual values | Low |
+| Fix NanoHTTPD deprecated `parms` | Migrate to `session.parseBody()` API | Low |

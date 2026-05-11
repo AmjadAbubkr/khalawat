@@ -1,7 +1,9 @@
 # Conventions — Khalawat
 
 ## Package Structure
+
 All code lives under `com.khalawat.android`. Each module has its own package:
+
 - `blocklist` — domain blocklist
 - `dns` — DNS proxy and packet parsing
 - `escalation` — escalation state machine
@@ -33,33 +35,44 @@ All code lives under `com.khalawat.android`. Each module has its own package:
 
 ### Functions
 - Public interface methods: verb or verb phrase (e.g., `onBlockedRequest()`, `override()`, `resolve()`)
-- Private helpers: descriptive (e.g., `persistState()`, `extractDomain()`)
+- Private helpers: descriptive (e.g., `persistState()`, `extractDomain()`, `escapeHtml()`)
 
 ### Variables
 - Private mutable state: prefixed with underscore (e.g., `_isHoldActive`, `_holdProgress`)
 - Public read-only access: no underscore (e.g., `isHoldActive`, `holdProgress`)
+- Compose-local state: `by remember { mutableStateOf(...) }` (e.g., `holdElapsed`, `pinInput`)
 
 ## Architecture Patterns
 
 ### Interface-Implementation Separation
+
 Every module exposes a pure Kotlin interface with no Android dependencies:
+
 ```kotlin
 interface DnsProxy {
     fun resolve(query: DnsQuery): DnsResponse
 }
 ```
+
 Implementation classes depend on Android where needed; interfaces stay testable.
 
 ### Testable Logic Core
+
 Android-dependent code is split into:
 1. **Thin Android shell** — handles lifecycle, permissions, system APIs (e.g., `KhalawatVpnService`)
 2. **Pure logic core** — fully unit-testable (e.g., `DnsResolverCoordinator`)
 
 ### State Machines
+
 UI state is driven by pure-logic state machines with no Compose dependency:
 - `OnboardingState` — drives `OnboardingFlow` Compose UI
 - `AntiTamperState` — drives `DisableScreen` Compose UI
 - `EscalationEngine` — drives intervention server responses
+
+**Important**: State machines use plain `var` properties (not `mutableStateOf`) to maintain zero Compose dependencies and full unit-testability. Compose consumers bridge the gap via:
+- Local `mutableStateOf` variables in Composables (e.g., `holdElapsed` in `DisableScreen`)
+- `LaunchedEffect` timers that sync external state → Compose state (e.g., calling `updateHoldProgress()`)
+- Parent state changes that trigger recomposition
 
 ### Repository Pattern
 - `SessionRepository` interface for persistence
@@ -68,6 +81,9 @@ UI state is driven by pure-logic state machines with no Compose dependency:
 
 ### Singleton Pattern (Database)
 `AppDatabase` uses a companion object `getInstance(context)` to ensure single Room instance.
+
+### HTML Template Safety
+All dynamic content inserted into HTML templates must be escaped via `escapeHtml()` to prevent XSS. This applies to both spiritual content (from `SpiritualContent`) and user-controlled query parameters (from `IHTTPSession.parms`).
 
 ## Kotlin Style
 
@@ -79,6 +95,7 @@ UI state is driven by pure-logic state machines with no Compose dependency:
 ### Coroutines
 - Room DAO methods use `suspend` modifier
 - `kotlinx.coroutines.test` for testing coroutine code
+- `delay()` used in `LaunchedEffect` for UI timers (e.g., hold progress)
 
 ### Data Classes
 - Prefer `data class` for immutable state objects
@@ -95,15 +112,17 @@ UI state is driven by pure-logic state machines with no Compose dependency:
 ## Compose UI Conventions
 
 ### Screen Structure
+
 Each screen is a `@Composable` function:
+
 ```kotlin
 @Composable
 fun DashboardScreen(
     isVpnActive: Boolean,
-    interventionCount: Int,
-    currentStage: String,
+    currentStage: EscalationStage,
+    overrideCountToday: Int,
     onToggleVpn: () -> Unit,
-    onDisable: () -> Unit
+    onShowDisable: () -> Unit
 )
 ```
 
@@ -111,10 +130,18 @@ fun DashboardScreen(
 - UI state is hoisted to the caller (`MainActivity`)
 - Event callbacks passed as lambda parameters
 - State machines owned by `MainActivity`, not inside composables
+- Compose-local state (e.g., `holdElapsed`, `pinInput`) uses `remember { mutableStateOf(...) }`
+
+### Timers in Compose
+- Use `LaunchedEffect(key)` to start/stop timers
+- `delay(intervalMs)` inside a `while` loop for periodic updates
+- Key on the condition that starts/stops the timer (e.g., `state.isHoldActive`)
+- Timer logic delegates to the state machine (`updateHoldProgress()`); Composable only bridges
 
 ### Theming
 - Islamic green color scheme defined in `Color.kt` and `Theme.kt`
 - Uses Material3 dynamic theming where available
+- **Known issue**: Color constant names (`Purple80`, `Pink80`) don't match actual values (green) — cosmetic debt
 
 ## Build Conventions
 

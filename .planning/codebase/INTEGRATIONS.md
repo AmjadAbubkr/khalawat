@@ -9,6 +9,8 @@
 - **Foreground Service**: Required notification with "Khalawat is active"
 - **Permission**: User must grant VPN permission via system dialog
 - **Entry point**: `KhalawatVpnService.kt` — thin shell; all logic delegated to `DnsResolverCoordinator`
+- **Packet construction**: `buildResponsePacket()` computes valid RFC 791 IPv4 header checksum (one's-complement sum over 20-byte header, written to bytes 10-11)
+- **DNS forwarding**: `forwardDns()` uses `DatagramSocket` protected via `VpnService.protect()` to bypass the TUN loop
 
 ### SharedPreferences (`android.content.SharedPreferences`)
 - **Purpose**: Persistent app preferences
@@ -17,8 +19,10 @@
   - `companion_pin` (String?)
   - `selected_language` (String)
   - `vpn_active` (Boolean)
-  - `parent_message` (String?)
+  - `parent_message` (String)
+  - `disconnect_count` (Int)
 - **Wrapper**: `KhalawatPreferences.kt`
+- **Security note**: PIN stored in plaintext; should migrate to EncryptedSharedPreferences (see CONCERNS.md)
 
 ### Room Database (`androidx.room`)
 - **Purpose**: Persist escalation state across process death
@@ -32,7 +36,7 @@
 
 ### NotificationChannel
 - **Channel ID**: `khalawat_vpn`
-- **Name**: "Khalawat VPN Protection"
+- **Name**: "Khalawat VPN"
 - **Importance**: LOW (non-intrusive)
 - **Created in**: `KhalawatVpnService.onCreate()`
 
@@ -63,6 +67,7 @@ The coordinator is the central orchestrator:
   - STAGE_2 → `stage2.html` (breathing + dhikr)
   - STAGE_3 → `stage3.html` (2-min lock)
   - COOLING → `stage3.html` (same as Stage 3)
+  - UNLOCKED → domain accessible (no intervention page served)
 
 ### OnboardingState ↔ KhalawatPreferences
 - When onboarding completes, `KhalawatPreferences` stores:
@@ -73,7 +78,8 @@ The coordinator is the central orchestrator:
 
 ### AntiTamperState ↔ KhalawatPreferences
 - Reads companion PIN from `KhalawatPreferences` to determine if PIN gate is needed
-- Tracks disconnect count for reminder notification logic
+- `disconnectCount` is persisted in `KhalawatPreferences` and restored on app restart
+- `shouldShowDisconnectReminder` fires after 3+ disconnects
 
 ### BlocklistStore ↔ DnsProxy
 - `DnsProxyImpl` uses `BlocklistStore.isBlocked(domain)` to check each query
@@ -82,6 +88,7 @@ The coordinator is the central orchestrator:
 ### SpiritualContent ↔ InterventionServer
 - `InterventionServer` uses `SpiritualContent.nextAyah()` / `nextHadith()` to populate intervention pages
 - Content rotated without replacement until all items shown
+- **All content is HTML-escaped** via `escapeHtml()` before template insertion to prevent XSS
 
 ## External Network Integrations
 
@@ -90,14 +97,17 @@ The coordinator is the central orchestrator:
 - **Address**: `8.8.8.8:53` (Google Public DNS)
 - **Protocol**: UDP
 - **Privacy note**: Only clean (non-blocked) queries reach this server. Blocked queries never leave the device.
+- **Fallback**: None currently — if 8.8.8.8 is unreachable, non-blocked DNS fails (see CONCERNS.md)
 
 ### NanoHTTPD (embedded)
 - **Purpose**: Serve intervention HTML pages to redirected browsers
 - **Bind**: `127.0.0.1:8080`
 - **Scope**: Local only — no external network access
 - **Library version**: 2.3.1
+- **Known issue**: `session.parms` API is deprecated; should migrate to `session.parseBody()`
 
 ## No External Services
+
 Khalawat has **zero** external service dependencies:
 - No analytics
 - No crash reporting
