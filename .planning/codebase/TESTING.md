@@ -125,19 +125,7 @@ Android-dependent code (VPN service, Compose UI) is tested via thin shells that 
 
 ## Running Tests
 
-```bash
-# All unit tests
-gradlew.bat testDebugUnitTest
 
-# Specific test class
-gradlew.bat testDebugUnitTest --tests "com.khalawat.android.escalation.EscalationEngineTest"
-
-# With verbose output
-gradlew.bat testDebugUnitTest --info
-
-# Instrumented tests (requires device/emulator)
-gradlew.bat connectedAndroidTest
-```
 
 ## CI Integration
 

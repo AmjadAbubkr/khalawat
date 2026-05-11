@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}" dir="{{DIR}}">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khalawat — Breathe</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#071a09;color:#e8f5e9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px;text-align:center}
+.container{max-width:420px;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:32px}
+.section-title{font-size:0.85rem;text-transform:uppercase;letter-spacing:2px;color:#66bb6a;margin-bottom:8px}
+/* Breathing circle */
+.breathing-container{position:relative;width:200px;height:200px;display:flex;align-items:center;justify-content:center}
+.breath-circle{width:80px;height:80px;border-radius:50%;background:radial-gradient(circle,#2e7d32,#1B5E20);transition:all 4s ease-in-out;box-shadow:0 0 40px rgba(76,175,80,0.3)}
+.breath-circle.inhale{width:180px;height:180px;transition-duration:4s;transition-timing-function:ease-in}
+.breath-circle.hold{width:180px;height:180px;transition-duration:0.1s;box-shadow:0 0 60px rgba(76,175,80,0.5)}
+.breath-circle.exhale{width:80px;height:80px;transition-duration:8s;transition-timing-function:ease-out}
+.breath-text{position:absolute;font-size:1.3rem;color:#fff;font-weight:600;pointer-events:none}
+.breath-count{position:absolute;bottom:-30px;font-size:2rem;color:#4caf50;font-weight:700}
+/* Dhikr counter */
+.dhikr-section{width:100%}
+.dhikr-grid{display:flex;flex-direction:column;gap:12px;width:100%}
+.dhikr-item{display:flex;align-items:center;justify-content:space-between;background:rgba(46,125,50,0.15);border:1px solid rgba(76,175,80,0.2);border-radius:12px;padding:12px 16px;cursor:pointer;transition:all 0.2s;user-select:none}
+.dhikr-item:active{background:rgba(46,125,50,0.35);transform:scale(0.98)}
+.dhikr-arabic{font-size:1.4rem;font-family:'Traditional Arabic','Scheherazade New',serif;color:#fff}
+.dhikr-trans{font-size:0.75rem;color:#a5d6a7}
+.dhikr-count{font-size:1.8rem;color:#4caf50;font-weight:700;min-width:40px;text-align:right}
+/* Timer & buttons */
+.stage-timer{font-size:0.9rem;color:#81c784;margin-top:16px}
+.btn-group{display:flex;flex-direction:column;gap:12px;align-items:center;width:100%}
+.btn{padding:14px 32px;border-radius:12px;font-size:1rem;cursor:pointer;border:none;font-weight:600;transition:all 0.3s;width:100%;max-width:280px}
+.btn-primary{background:#2e7d32;color:#fff}
+.btn-primary:hover{background:#388e3c}
+.btn-primary:disabled{background:#1a3a1a;color:#4a6a4a;cursor:not-allowed}
+.btn-override{background:transparent;color:#3a5a3a;font-size:0.75rem;cursor:pointer;border:none;text-decoration:underline;opacity:0.4;padding:8px}
+.btn-override:disabled{opacity:0.1;cursor:not-allowed;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="container">
+  <div>
+    <div class="section-title">Breathe with intention</div>
+    <div class="breathing-container">
+      <div class="breath-circle" id="breathCircle"></div>
+      <div class="breath-text" id="breathText">Breathe in</div>
+      <div class="breath-count" id="breathCount">4</div>
+    </div>
+  </div>
+  <div class="dhikr-section">
+    <div class="section-title">Dhikr — tap to count</div>
+    <div class="dhikr-grid">
+      <div class="dhikr-item" onclick="incrementDhikr(0)">
+        <div><div class="dhikr-arabic">{{DHIKR_1_ARABIC}}</div><div class="dhikr-trans">{{DHIKR_1_TRANS}}</div></div>
+        <div class="dhikr-count" id="dhikr0">0</div>
+      </div>
+      <div class="dhikr-item" onclick="incrementDhikr(1)">
+        <div><div class="dhikr-arabic">{{DHIKR_2_ARABIC}}</div><div class="dhikr-trans">{{DHIKR_2_TRANS}}</div></div>
+        <div class="dhikr-count" id="dhikr1">0</div>
+      </div>
+      <div class="dhikr-item" onclick="incrementDhikr(2)">
+        <div><div class="dhikr-arabic">{{DHIKR_3_ARABIC}}</div><div class="dhikr-trans">{{DHIKR_3_TRANS}}</div></div>
+        <div class="dhikr-count" id="dhikr2">0</div>
+      </div>
+    </div>
+  </div>
+  <div class="stage-timer" id="stageTimer">Wait 30 seconds...</div>
+  <div class="btn-group">
+    <button class="btn btn-primary" id="calmBtn" disabled>I've calmed down — go back</button>
+    <button class="btn-override" id="overrideBtn" disabled>Override</button>
+  </div>
+</div>
+<script>
+const WAIT_SECONDS=30;
+const LANG="{{LANG}}";
+let waitLeft=WAIT_SECONDS;
+let dhikrCounts=[0,0,0];
+const breathCircle=document.getElementById('breathCircle');
+const breathText=document.getElementById('breathText');
+const breathCount=document.getElementById('breathCount');
+const calmBtn=document.getElementById('calmBtn');
+const overrideBtn=document.getElementById('overrideBtn');
+const stageTimer=document.getElementById('stageTimer');
+// Breathing 4-7-8
+const phases=[
+  {name:'Breathe in',duration:4,cls:'inhale'},
+  {name:'Hold',duration:7,cls:'hold'},
+  {name:'Breathe out',duration:8,cls:'exhale'}
+];
+let phaseIdx=0;
+let phaseCount=0;
+function runBreathPhase(){
+  const phase=phases[phaseIdx];
+  breathCircle.className='breath-circle '+phase.cls;
+  breathText.textContent=phase.name;
+  phaseCount=phase.duration;
+  breathCount.textContent=phaseCount;
+  const countInterval=setInterval(()=>{
+    phaseCount--;
+    breathCount.textContent=phaseCount>0?phaseCount:'';
+    if(phaseCount<=0){
+      clearInterval(countInterval);
+      phaseIdx=(phaseIdx+1)%phases.length;
+      runBreathPhase();
+    }
+  },1000);
+}
+runBreathPhase();
+// Wait timer
+const waitInterval=setInterval(()=>{
+  waitLeft--;
+  stageTimer.textContent=waitLeft>0?`Wait ${waitLeft} seconds...`:'';
+  if(waitLeft<=0){
+    clearInterval(waitInterval);
+    calmBtn.disabled=false;
+    overrideBtn.disabled=false;
+    stageTimer.textContent='';
+  }
+},1000);
+calmBtn.addEventListener('click',()=>{window.history.back()});
+overrideBtn.addEventListener('click',()=>{
+  window.location.href='/stage3?lang='+LANG;
+});
+function incrementDhikr(idx){
+  dhikrCounts[idx]++;
+  document.getElementById('dhikr'+idx).textContent=dhikrCounts[idx];
+}
+</script>
+</body>
+</html>

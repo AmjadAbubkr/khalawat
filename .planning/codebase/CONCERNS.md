@@ -37,12 +37,6 @@
    - **Mitigation**: Port is localhost-only; risk is limited to co-resident malicious apps
    - **Priority**: Low — standard Android sandboxing limits inter-app access
 
-5. **OnboardingState plain vars not Compose-observable**
-   - `OnboardingState` uses plain `var` properties, not `mutableStateOf`
-   - **Risk**: UI may not recompose when only OnboardingState fields change (no parent state change)
-   - **Mitigation**: Currently works because `onClick` callbacks trigger parent recomposition; fragile long-term
-   - **Priority**: Low — Intentional design trade-off for testability; proper fix is snapshot-state wrappers at Composable layer
-   - **Note**: Same pattern applies to `AntiTamperState` — consumed via `LaunchedEffect` + local `mutableStateOf` in `DisableScreen`
 
 ## Architecture Risks
 
@@ -82,6 +76,7 @@
 | ~~XSS via unescaped template replacements~~ | Added `escapeHtml()` utility; all `.replace()` calls now escape dynamic content | 2026-05-11 |
 | ~~IPv4 header checksum unset~~ | Added RFC 791 one's-complement checksum computation in `buildResponsePacket()` | 2026-05-11 |
 | ~~Deprecated `startActivityForResult`~~ | Replaced with `ActivityResultContracts` in `MainActivity` | 2026-05-11 |
+
 
 ## Missing Features (Post-MVP)
 

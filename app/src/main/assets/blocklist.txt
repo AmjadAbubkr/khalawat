@@ -1,0 +1,61 @@
+# Khalawat Blocklist
+# Updated via Google Play app updates
+# Format: one domain per line, # comments ignored, subdomain matching supported
+# Source: compiled from open-source blocklists
+
+# Pornography
+pornhub.com
+xvideos.com
+xhamster.com
+xnxx.com
+redtube.com
+youporn.com
+brazzers.com
+bangbros.com
+naughtyamerica.com
+realitykings.com
+playboy.com
+chaturbate.com
+livejasmin.com
+stripchat.com
+cam4.com
+camsoda.com
+myfreecams.com
+bongacams.com
+porntrex.com
+eporner.com
+spankbang.com
+tnaflix.com
+drtuber.com
+tube8.com
+beeg.com
+hqporner.com
+daftsex.com
+fuq.com
+thumbzilla.com
+alohatube.com
+motherless.com
+
+# Gambling
+bet365.com
+pokerstars.com
+888casino.com
+williamhill.com
+unibet.com
+betway.com
+888sport.com
+bwin.com
+ladbrokes.com
+betfair.com
+
+# DNS-over-HTTPS (anti-tamper — prevent bypassing our DNS)
+dns.google
+cloudflare-dns.com
+dns.quad9.net
+doh.opendns.com
+dns.adguard.com
+doh.cleanbrowsing.org
+doh.xfinity.com
+secure.avast.com
+doh.mullvad.dns
+
