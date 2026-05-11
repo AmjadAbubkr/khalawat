@@ -16,6 +16,11 @@ import kotlinx.coroutines.delay
 /**
  * Anti-tamper disable screen with 30-sec hold button.
  * Shown when user tries to disable Khalawat VPN.
+ *
+ * AntiTamperState uses mutableStateOf — Compose observes isHoldActive,
+ * holdProgress, and isHoldComplete directly. The LaunchedEffect key
+ * is state.isHoldActive, which now properly triggers recomposition
+ * when startHold() or releaseHold() is called.
  */
 @Composable
 fun DisableScreen(
@@ -23,11 +28,13 @@ fun DisableScreen(
     onDisable: () -> Unit,
     onCancel: () -> Unit
 ) {
+    // Track elapsed time locally to feed updateHoldProgress()
     var holdElapsed by remember { mutableStateOf(0L) }
     var pinInput by remember { mutableStateOf("") }
     var pinError by remember { mutableStateOf(false) }
 
-    // Timer that advances hold progress while the hold is active
+    // Timer that advances hold progress while the hold is active.
+    // Key = state.isHoldActive (now a mutableStateOf — changes trigger relaunch)
     LaunchedEffect(state.isHoldActive) {
         if (state.isHoldActive) {
             val startTime = System.currentTimeMillis() - holdElapsed
@@ -37,6 +44,11 @@ fun DisableScreen(
                 state.updateHoldProgress(holdElapsed)
             }
         }
+    }
+
+    // Reset local elapsed when hold is released
+    if (!state.isHoldActive && holdElapsed != 0L) {
+        holdElapsed = 0L
     }
 
     Column(
@@ -164,6 +176,7 @@ fun DisableScreen(
         }
 
         Spacer(modifier = Modifier.height(24.dp))
+
         OutlinedButton(onClick = {
             holdElapsed = 0L
             state.releaseHold()

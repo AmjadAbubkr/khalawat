@@ -8,9 +8,10 @@ import org.junit.Test
  * Issue #11: Anti-tamper — TDD
  *
  * Tests the AntiTamperState that enforces:
- *   - 30-second hold on "I want to disable" button
- *   - Spiritual reminder during hold
- *   - Disconnect reminder notification
+ * - 30-second hold on "I want to disable" button
+ * - Spiritual reminder during hold
+ * - Companion PIN gate (if enabled)
+ * - Disconnect tracking for reminder notifications
  */
 class AntiTamperStateTest {
 

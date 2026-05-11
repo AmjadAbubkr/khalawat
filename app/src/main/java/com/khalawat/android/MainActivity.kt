@@ -53,7 +53,8 @@ class MainActivity : ComponentActivity() {
                         antiTamperState = antiTamperState,
                         onRequestVpnPermission = { requestVpnPermission() },
                         onStartVpn = { startVpn() },
-                        onStopVpn = { stopVpn() }
+                        onStopVpn = { stopVpn() },
+                        onClearOnboarding = { prefs.clear() }
                     )
                 }
             }
@@ -103,6 +104,17 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/**
+ * Root composable for the Khalawat app.
+ *
+ * Key design: `showOnboarding` is derived from BOTH the persisted
+ * `isOnboardingComplete` flag (from SharedPreferences) AND the live
+ * `onboardingState.isComplete` (mutableStateOf). This ensures:
+ * - Fresh installs always start onboarding
+ * - Returning users (who completed onboarding previously) skip to dashboard
+ * - Completing onboarding in the CURRENT session reactively dismisses it
+ *   without any imperative "showOnboarding = false" call
+ */
 @Composable
 fun KhalawatApp(
     isOnboardingComplete: Boolean,
@@ -111,9 +123,17 @@ fun KhalawatApp(
     antiTamperState: AntiTamperState,
     onRequestVpnPermission: () -> Unit,
     onStartVpn: () -> Unit,
-    onStopVpn: () -> Unit
+    onStopVpn: () -> Unit,
+    onClearOnboarding: () -> Unit = {}
 ) {
-    var showOnboarding by remember { mutableStateOf(!isOnboardingComplete) }
+    // showOnboarding is true only while onboarding has never been completed
+    // (neither in this session nor in a previous one).
+    // When onboardingState.isComplete becomes true (via grantVpnPermission),
+    // this reactive derivation automatically recomposes and hides onboarding.
+    val showOnboarding by remember {
+        derivedStateOf { !isOnboardingComplete && !onboardingState.isComplete }
+    }
+
     var showDisableScreen by remember { mutableStateOf(false) }
     var currentStage by remember { mutableStateOf(EscalationStage.STAGE_1) }
     var overrideCount by remember { mutableStateOf(0) }
@@ -122,13 +142,13 @@ fun KhalawatApp(
         showOnboarding -> {
             OnboardingFlow(
                 state = onboardingState,
-                onRequestVpnPermission = {
-                    onRequestVpnPermission()
-                    if (onboardingState.isComplete) {
-                        showOnboarding = false
-                    }
-                },
-                onFinish = { showOnboarding = false }
+                onRequestVpnPermission = onRequestVpnPermission,
+                onFinish = {
+                    // onFinish is called when user clicks "Start Protecting"
+                    // after VPN permission is granted. The reactive
+                    // derivedStateOf already hides onboarding, but we keep
+                    // this callback for any future side-effects.
+                }
             )
         }
         showDisableScreen -> {
@@ -138,7 +158,9 @@ fun KhalawatApp(
                     onStopVpn()
                     showDisableScreen = false
                 },
-                onCancel = { showDisableScreen = false }
+                onCancel = {
+                    showDisableScreen = false
+                }
             )
         }
         else -> {
