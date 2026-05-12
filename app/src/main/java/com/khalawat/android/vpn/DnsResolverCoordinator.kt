@@ -45,6 +45,7 @@ class DnsResolverCoordinator(
                 val domain = com.khalawat.android.dns.DnsPacketParser.extractDomain(query.data) ?: "unknown"
                 val state = escalationEngine.onBlockedRequest(domain)
                 persistState(state)
+                sessionRepository.logIntervention(domain, state.stage, System.currentTimeMillis())
                 DnsResult(
                     action = DnsResult.Action.REDIRECT,
                     escalationStage = state.stage,

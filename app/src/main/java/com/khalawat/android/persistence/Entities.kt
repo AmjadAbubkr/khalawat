@@ -20,3 +20,11 @@ data class OverrideLogEntity(
     val timestamp: Long,
     val stageReached: EscalationStage
 )
+
+@Entity(tableName = "intervention_log")
+data class InterventionLogEntity(
+    @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val domain: String,
+    val timestamp: Long,
+    val stageReached: EscalationStage
+)

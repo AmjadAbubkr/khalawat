@@ -7,8 +7,8 @@ import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 
 @Database(
-    entities = [EscalationStateEntity::class, OverrideLogEntity::class],
-    version = 1,
+    entities = [EscalationStateEntity::class, OverrideLogEntity::class, InterventionLogEntity::class],
+    version = 2,
     exportSchema = false
 )
 @TypeConverters(Converters::class)

@@ -23,8 +23,11 @@ class SpiritualContentImpl : SpiritualContent {
     override fun loadContent(path: String) {
         val file = File(path)
         if (!file.exists()) return
+        loadJson(file.readText())
+    }
 
-        val json = JSONObject(file.readText())
+    fun loadJson(jsonText: String) {
+        val json = JSONObject(jsonText)
 
         ayat = parseEntries(json.optJSONArray("ayat") ?: org.json.JSONArray())
         hadith = parseEntries(json.optJSONArray("hadith") ?: org.json.JSONArray())

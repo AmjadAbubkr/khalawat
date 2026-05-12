@@ -59,13 +59,13 @@ fun DisableScreen(
 
     Box(
         modifier = Modifier.fillMaxSize()
+            .safeDrawingPadding()
             .background(MaterialTheme.colorScheme.background)
-            .systemBarsPadding(),
+            .padding(horizontal = 24.dp),
         contentAlignment = Alignment.Center,
     ) {
         Column(
             modifier = Modifier.fillMaxSize()
-                .padding(24.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,

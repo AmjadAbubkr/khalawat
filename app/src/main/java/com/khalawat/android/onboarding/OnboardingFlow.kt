@@ -2,6 +2,7 @@ package com.khalawat.android.onboarding
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -9,6 +10,8 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideInVertically
@@ -59,7 +62,12 @@ fun OnboardingFlow(
 ) {
     val totalSteps = OnboardingScreen.entries.size
 
-    Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding()
+            .padding(horizontal = 24.dp, vertical = 16.dp)
+    ) {
         Column(
             modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -105,8 +113,17 @@ fun OnboardingFlow(
                 targetState = state.currentScreen,
                 transitionSpec = {
                     val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
-                    slideInHorizontally(animationSpec = tween(350)) { fullWidth -> fullWidth * dir } togetherWith
-                    slideOutHorizontally(animationSpec = tween(350)) { fullWidth -> -fullWidth * dir }
+                    (
+                        slideInHorizontally(
+                            animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
+                        ) { fullWidth -> (fullWidth * 0.08f * dir).toInt() } +
+                            fadeIn(animationSpec = tween(durationMillis = 220))
+                        ) togetherWith (
+                        slideOutHorizontally(
+                            animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing)
+                        ) { fullWidth -> (-fullWidth * 0.05f * dir).toInt() } +
+                            fadeOut(animationSpec = tween(durationMillis = 180))
+                        )
                 },
                 label = "onboarding_page"
                 ) { screen ->

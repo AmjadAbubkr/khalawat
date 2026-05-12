@@ -32,6 +32,16 @@ class RoomSessionRepository(private val dao: EscalationStateDao) : SessionReposi
         dao.clearState()
     }
 
+    override fun logIntervention(domain: String, stage: EscalationStage, timestamp: Long) {
+        dao.logIntervention(
+            InterventionLogEntity(
+                domain = domain,
+                timestamp = timestamp,
+                stageReached = stage
+            )
+        )
+    }
+
     override fun logOverride(domain: String, stage: EscalationStage, timestamp: Long) {
         dao.logOverride(
             OverrideLogEntity(
@@ -40,6 +50,10 @@ class RoomSessionRepository(private val dao: EscalationStateDao) : SessionReposi
                 stageReached = stage
             )
         )
+    }
+
+    override fun getInterventionCountSince(sinceTimestamp: Long): Int {
+        return dao.getInterventionCountSince(sinceTimestamp)
     }
 
     override fun getOverrideCountSince(sinceTimestamp: Long): Int {

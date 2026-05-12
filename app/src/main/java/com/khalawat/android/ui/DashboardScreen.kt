@@ -73,7 +73,12 @@ fun DashboardScreen(
         label = "shield_scale"
     )
 
-    Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .safeDrawingPadding()
+            .padding(horizontal = 24.dp)
+    ) {
         Column(
             modifier = Modifier.fillMaxSize().padding(top = 16.dp, bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,

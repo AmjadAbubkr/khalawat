@@ -235,6 +235,15 @@ class FakeEscalationEngine : EscalationEngine {
         )
     }
 
+    override fun restore(
+        stage: EscalationStage,
+        lastRequestTimeMillis: Long,
+        lastOverrideTimeMillis: Long?,
+        cooldownEndTimeMillis: Long?
+    ) {
+        nextStage = stage
+    }
+
     override fun getCurrentStage(): EscalationStage = nextStage
     override fun getCooldownEndTime(): Instant? = currentCooldown
     override fun getLastRequestTime(): Instant = currentTime
@@ -244,14 +253,20 @@ class FakeEscalationEngine : EscalationEngine {
 class FakeSessionRepoForVpn : SessionRepository {
     var savedState: PersistentEscalationState? = null
     var cleared = false
+    val interventionLogs = mutableListOf<Triple<String, EscalationStage, Long>>()
     val overrideLogs = mutableListOf<Triple<String, EscalationStage, Long>>()
 
     override fun loadState(): PersistentEscalationState? = savedState
     override fun saveState(state: PersistentEscalationState) { savedState = state }
     override fun clearState() { cleared = true; savedState = null }
+    override fun logIntervention(domain: String, stage: EscalationStage, timestamp: Long) {
+        interventionLogs.add(Triple(domain, stage, timestamp))
+    }
     override fun logOverride(domain: String, stage: EscalationStage, timestamp: Long) {
         overrideLogs.add(Triple(domain, stage, timestamp))
     }
+    override fun getInterventionCountSince(sinceTimestamp: Long): Int =
+        interventionLogs.count { it.third > sinceTimestamp }
     override fun getOverrideCountSince(sinceTimestamp: Long): Int =
         overrideLogs.count { it.third > sinceTimestamp }
     override fun clearOverrideLogs() { overrideLogs.clear() }

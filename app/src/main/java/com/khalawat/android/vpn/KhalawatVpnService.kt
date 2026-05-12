@@ -2,20 +2,25 @@ package com.khalawat.android.vpn
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Intent
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import com.khalawat.android.blocklist.BlocklistStoreImpl
+import com.khalawat.android.KhalawatPreferences
+import com.khalawat.android.MainActivity
+import com.khalawat.android.content.ContentItem
+import com.khalawat.android.content.Language
+import com.khalawat.android.content.SpiritualContentProvider
 import com.khalawat.android.dns.DnsProxy
 import com.khalawat.android.dns.DnsProxyImpl
 import com.khalawat.android.dns.DnsQuery
 import com.khalawat.android.escalation.EscalationEngine
 import com.khalawat.android.escalation.EscalationEngineImpl
 import com.khalawat.android.persistence.AppDatabase
+import com.khalawat.android.persistence.PersistentEscalationState
 import com.khalawat.android.persistence.RoomSessionRepository
-import com.khalawat.android.server.InterventionServer
-import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 import java.net.DatagramPacket
@@ -28,7 +33,7 @@ import java.net.InetAddress
  * Architecture:
  *   TUN -> raw IP packet -> extract UDP/DNS -> DnsResolverCoordinator ->
  *     FORWARD: relay to upstream DNS, write response back to TUN
- *     REDIRECT: return 127.0.0.1 (InterventionServer) to TUN
+ *     REDIRECT: return a blocked IP to TUN and emit an in-app intervention event
  *
  * The heavy logic lives in DnsResolverCoordinator (unit-testable).
  * This class is a thin Android shell: TUN setup + packet loop.
@@ -37,14 +42,17 @@ class KhalawatVpnService : VpnService() {
 
     companion object {
         const val VPN_ADDRESS = "10.0.0.2"
-        const val VPN_ROUTE = "0.0.0.0"
+        const val VPN_DNS_ROUTE = "8.8.8.8"
         const val VPN_MTU = 1500
         const val ACTION_START = "com.khalawat.android.action.START_VPN"
         const val ACTION_STOP = "com.khalawat.android.action.STOP_VPN"
+        const val ACTION_OVERRIDE_INTERVENTION = "com.khalawat.android.action.OVERRIDE_INTERVENTION"
+        const val ACTION_COMPLETE_STAGE_3 = "com.khalawat.android.action.COMPLETE_STAGE_3"
         const val ACTION_VPN_STARTED = "com.khalawat.android.action.VPN_STARTED"
         const val ACTION_VPN_STOPPED = "com.khalawat.android.action.VPN_STOPPED"
         const val NOTIFICATION_CHANNEL_ID = "khalawat_vpn"
         const val NOTIFICATION_ID = 1
+        const val INTERVENTION_NOTIFICATION_ID = 2
         private const val TAG = "KhalawatVpn"
 
         @Volatile
@@ -56,8 +64,11 @@ class KhalawatVpnService : VpnService() {
 
     private var vpnInterface: ParcelFileDescriptor? = null
     private var coordinator: DnsResolverCoordinator? = null
-    private var interventionServer: InterventionServer? = null
     private var vpnThread: Thread? = null
+    private lateinit var sessionRepo: RoomSessionRepository
+    private lateinit var prefs: KhalawatPreferences
+    private lateinit var escalationEngine: EscalationEngine
+    private lateinit var spiritualContent: com.khalawat.android.content.SpiritualContentImpl
 
     @Volatile
     private var running = false
@@ -65,26 +76,39 @@ class KhalawatVpnService : VpnService() {
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
-
+        prefs = KhalawatPreferences(this)
+        spiritualContent = SpiritualContentProvider.get(this)
         val blocklistStore = BlocklistStoreImpl()
+        val blocklistFile = kotlin.io.path.createTempFile(directory = cacheDir.toPath(), prefix = "blocklist_", suffix = ".txt").toFile()
         assets.open("blocklist.txt").bufferedReader().use { reader ->
-            val tempFile = File(cacheDir, "blocklist.txt")
-            tempFile.writeText(reader.readText())
-            blocklistStore.loadBlocklist(tempFile.absolutePath)
+            blocklistFile.writeText(reader.readText())
         }
+        blocklistStore.loadBlocklist(blocklistFile.absolutePath)
 
         val dnsProxy: DnsProxy = DnsProxyImpl(blocklistStore)
-        val escalationEngine: EscalationEngine = EscalationEngineImpl(java.time.Clock.systemUTC())
-        val sessionRepo = RoomSessionRepository(
+        escalationEngine = EscalationEngineImpl(java.time.Clock.systemUTC())
+        sessionRepo = RoomSessionRepository(
             AppDatabase.getInstance(this).escalationStateDao()
         )
+        restoreEscalationState(sessionRepo.loadState())
         coordinator = DnsResolverCoordinator(dnsProxy, escalationEngine, sessionRepo)
+        syncDashboardState()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_STOP) {
-            stopVpn()
-            return START_NOT_STICKY
+        when (intent?.action) {
+            ACTION_STOP -> {
+                stopVpn()
+                return START_NOT_STICKY
+            }
+            ACTION_OVERRIDE_INTERVENTION -> {
+                handleInterventionOverride(intent.getStringExtra("domain").orEmpty())
+                return START_STICKY
+            }
+            ACTION_COMPLETE_STAGE_3 -> {
+                handleStage3Complete(intent.getStringExtra("domain").orEmpty())
+                return START_STICKY
+            }
         }
         if (vpnInterface != null) return START_STICKY
 
@@ -96,7 +120,6 @@ class KhalawatVpnService : VpnService() {
             return START_NOT_STICKY
         }
 
-        startInterventionServer()
         startPacketLoop()
         startForegroundNotification()
         isRunning = true
@@ -121,18 +144,9 @@ class KhalawatVpnService : VpnService() {
             .addDnsServer("8.8.8.8")
             .setMtu(VPN_MTU)
             .addDisallowedApplication(packageName)
-            .addRoute(VPN_ROUTE, 0)
+            .addRoute(VPN_DNS_ROUTE, 32)
 
         vpnInterface = builder.establish()
-    }
-
-    private fun startInterventionServer() {
-        val server = InterventionServer(
-            spiritualContent = com.khalawat.android.content.SpiritualContentImpl(),
-            assetLoader = { path -> assets.open(path) }
-        )
-        server.start()
-        interventionServer = server
     }
 
     private fun startPacketLoop() {
@@ -167,6 +181,7 @@ class KhalawatVpnService : VpnService() {
                         }
                     }
                     DnsResult.Action.REDIRECT -> {
+                        emitIntervention(result.domain, result.escalationStage)
                         outputStream.write(buildDnsResponse(packet, result.redirectIp))
                     }
                 }
@@ -273,7 +288,7 @@ class KhalawatVpnService : VpnService() {
         dnsResponse[off + 3] = 1; dnsResponse[off + 5] = 1 // TYPE A, CLASS IN
         dnsResponse[off + 9] = 60 // TTL
         dnsResponse[off + 11] = 4 // RDLENGTH
-        val ip = (redirectIp ?: InetAddress.getByName("127.0.0.1")).address
+        val ip = (redirectIp ?: InetAddress.getByName("0.0.0.0")).address
         System.arraycopy(ip, 0, dnsResponse, off + 12, 4)
 
         return buildResponsePacket(originalPacket, dnsResponse)
@@ -307,8 +322,6 @@ class KhalawatVpnService : VpnService() {
         isRunning = false
         vpnThread?.interrupt()
         vpnThread = null
-        interventionServer?.stop()
-        interventionServer = null
         vpnInterface?.close()
         vpnInterface = null
         broadcastVpnState(ACTION_VPN_STOPPED)
@@ -319,5 +332,133 @@ class KhalawatVpnService : VpnService() {
         val intent = Intent(action)
         intent.setPackage(packageName)
         sendBroadcast(intent)
+    }
+
+    private fun restoreEscalationState(state: PersistentEscalationState?) {
+        if (state == null) return
+        escalationEngine.restore(
+            stage = state.stage,
+            lastRequestTimeMillis = state.lastRequestTime,
+            lastOverrideTimeMillis = state.lastOverrideTime,
+            cooldownEndTimeMillis = state.cooldownEndTime
+        )
+    }
+
+    private fun syncDashboardState() {
+        val startOfDay = java.time.LocalDate.now()
+            .atStartOfDay(java.time.ZoneId.systemDefault())
+            .toInstant()
+            .toEpochMilli()
+        KhalawatRuntimeState.updateDashboard(
+            DashboardSnapshot(
+                currentStage = escalationEngine.getCurrentStage(),
+                interventionCountToday = sessionRepo.getInterventionCountSince(startOfDay)
+            )
+        )
+    }
+
+    private fun emitIntervention(domain: String, stage: com.khalawat.android.escalation.EscalationStage) {
+        val state = buildOverlayState(domain = domain, stage = stage)
+        prefs.pendingInterventionDomain = domain
+        prefs.pendingInterventionStage = stage.name
+        prefs.pendingInterventionStartedAt = state.startedAtMillis
+        KhalawatRuntimeState.showIntervention(state)
+        syncDashboardState()
+        showInterventionNotification(state)
+    }
+
+    private fun buildOverlayState(
+        domain: String,
+        stage: com.khalawat.android.escalation.EscalationStage
+    ): InterventionOverlayState {
+        val language = parseLanguage(prefs.selectedLanguage)
+        val startedAt = System.currentTimeMillis()
+        return when (stage) {
+            com.khalawat.android.escalation.EscalationStage.STAGE_1 -> {
+                val item = nextReflection(language)
+                InterventionOverlayState(
+                    stage = stage,
+                    domain = domain,
+                    startedAtMillis = startedAt,
+                    title = "Pause before you proceed",
+                    body = "A blocked request for $domain was intercepted. Take 15 seconds and sit with this reminder before making the next choice.",
+                    content = item,
+                )
+            }
+            com.khalawat.android.escalation.EscalationStage.STAGE_2 -> {
+                InterventionOverlayState(
+                    stage = stage,
+                    domain = domain,
+                    startedAtMillis = startedAt,
+                    title = "Slow down and reset",
+                    body = "The urge is still active. Breathe, repeat the dhikr, and give yourself 30 seconds before deciding anything else.",
+                    dhikrItems = List(3) { spiritualContent.nextDhikr(language) },
+                )
+            }
+            com.khalawat.android.escalation.EscalationStage.STAGE_3,
+            com.khalawat.android.escalation.EscalationStage.COOLING -> {
+                val item = nextReflection(language)
+                InterventionOverlayState(
+                    stage = com.khalawat.android.escalation.EscalationStage.STAGE_3,
+                    domain = domain,
+                    startedAtMillis = startedAt,
+                    title = "Hard stop",
+                    body = "Khalawat has moved into a two-minute hard stop. Stay here, breathe, and let the moment pass.",
+                    content = item,
+                )
+            }
+        }
+    }
+
+    private fun nextReflection(language: Language): ContentItem {
+        val ayah = spiritualContent.nextAyah(language)
+        return if (ayah.arabic.isNotBlank()) ayah else spiritualContent.nextHadith(language)
+    }
+
+    private fun parseLanguage(value: String): Language {
+        return try {
+            Language.valueOf(value)
+        } catch (_: IllegalArgumentException) {
+            Language.EN
+        }
+    }
+
+    private fun showInterventionNotification(state: InterventionOverlayState) {
+        val openIntent = Intent(this, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            INTERVENTION_NOTIFICATION_ID,
+            openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val notification = android.app.Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
+            .setContentTitle(state.title)
+            .setContentText("Blocked: ${state.domain}")
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .build()
+        getSystemService(NotificationManager::class.java)
+            .notify(INTERVENTION_NOTIFICATION_ID, notification)
+    }
+
+    private fun handleInterventionOverride(domain: String) {
+        if (domain.isBlank()) return
+        val result = coordinator?.override(domain) ?: return
+        emitIntervention(result.domain, result.escalationStage)
+    }
+
+    private fun handleStage3Complete(domain: String) {
+        if (domain.isBlank()) return
+        coordinator?.onStage3Complete(domain)
+        prefs.pendingInterventionDomain = null
+        prefs.pendingInterventionStage = null
+        prefs.pendingInterventionStartedAt = 0L
+        KhalawatRuntimeState.clearIntervention()
+        syncDashboardState()
+        getSystemService(NotificationManager::class.java)
+            .cancel(INTERVENTION_NOTIFICATION_ID)
     }
 }

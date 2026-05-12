@@ -21,7 +21,9 @@ interface SessionRepository {
     fun loadState(): PersistentEscalationState?
     fun saveState(state: PersistentEscalationState)
     fun clearState()
+    fun logIntervention(domain: String, stage: EscalationStage, timestamp: Long)
     fun logOverride(domain: String, stage: EscalationStage, timestamp: Long)
+    fun getInterventionCountSince(sinceTimestamp: Long): Int
     fun getOverrideCountSince(sinceTimestamp: Long): Int
     fun clearOverrideLogs()
 }
