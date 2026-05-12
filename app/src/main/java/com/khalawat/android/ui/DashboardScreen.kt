@@ -1,15 +1,27 @@
 package com.khalawat.android.ui
 
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.PowerSettingsNew
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -24,15 +36,50 @@ fun DashboardScreen(
     onToggleVpn: () -> Unit,
     onShowDisable: () -> Unit,
 ) {
+    val infiniteTransition = rememberInfiniteTransition(label = "dashboard_breathing")
+
+    val rawHaloScale by infiniteTransition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "halo_scale"
+    )
+
+    val rawHaloAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.04f,
+        targetValue = 0.12f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "halo_alpha"
+    )
+
+    val haloScale = if (isVpnActive) rawHaloScale else 1f
+    val haloAlpha = if (isVpnActive) rawHaloAlpha else 0f
+
+    val statusColor = if (isVpnActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+    val statusText = if (isVpnActive) "Protected" else "Unprotected"
+    val statusIcon = if (isVpnActive) Icons.Default.Shield else Icons.Default.Warning
+
+    val animatedScale by animateFloatAsState(
+        targetValue = if (isVpnActive) 1f else 0.95f,
+        animationSpec = tween(400),
+        label = "shield_scale"
+    )
+
     Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp)) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(top = 40.dp, bottom = 24.dp),
+            modifier = Modifier.fillMaxSize().padding(top = 16.dp, bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Top,
         ) {
-            // Top greeting row
             Row(
-                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
@@ -51,30 +98,26 @@ fun DashboardScreen(
             }
             Spacer(modifier = Modifier.height(40.dp))
 
-            // Status halo
-            val statusColor = if (isVpnActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-            val statusText = if (isVpnActive) "Protected" else "Unprotected"
-            val statusIcon = if (isVpnActive) Icons.Default.Shield else Icons.Default.Warning
-
             Box(modifier = Modifier.size(240.dp), contentAlignment = Alignment.Center) {
-                // subtle outer halo behind
                 Box(
                     modifier = Modifier.matchParentSize()
                         .background(statusColor.copy(alpha = 0.06f), CircleShape)
                 )
-                // breathing or ambient circle
                 if (isVpnActive) {
                     Box(
                         modifier = Modifier.size(200.dp)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape),
+                            .scale(haloScale)
+                            .background(
+                                MaterialTheme.colorScheme.primary.copy(alpha = haloAlpha),
+                                CircleShape
+                            ),
                     )
                 }
-                // core surface
                 Surface(
                     shape = CircleShape,
                     color = if (isVpnActive) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f),
                     tonalElevation = 4.dp,
-                    modifier = Modifier.size(150.dp),
+                    modifier = Modifier.size(150.dp).scale(animatedScale),
                 ) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
@@ -95,7 +138,6 @@ fun DashboardScreen(
 
             Spacer(modifier = Modifier.height(36.dp))
 
-            // Intervention stats
             Card(
                 modifier = Modifier.fillMaxWidth(0.9f),
                 shape = RoundedCornerShape(20.dp),
@@ -118,7 +160,6 @@ fun DashboardScreen(
 
             Spacer(modifier = Modifier.height(36.dp))
 
-            // Toggle
             Button(
                 onClick = { if (isVpnActive) onShowDisable() else onToggleVpn() },
                 modifier = Modifier.fillMaxWidth(0.75f).height(52.dp),

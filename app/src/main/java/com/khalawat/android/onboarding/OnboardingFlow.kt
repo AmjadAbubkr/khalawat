@@ -1,14 +1,29 @@
 package com.khalawat.android.onboarding
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.PlayArrow
@@ -24,6 +39,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
@@ -33,11 +49,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-
-/* ─── light / dark files are split for clarity ───────────────────────
- *  dark  →  light mode desing/ (Shadow-to-Light deep dark)
- *  light →  dark mode desing/ (Sage / gold on warm parchment)
- * ------------------------------------------------------------------- */
+import kotlinx.coroutines.delay
 
 @Composable
 fun OnboardingFlow(
@@ -45,7 +57,7 @@ fun OnboardingFlow(
     onRequestVpnPermission: () -> Unit,
     onFinish: () -> Unit,
 ) {
-    val totalSteps = OnboardingScreen.values().size
+    val totalSteps = OnboardingScreen.entries.size
 
     Box(modifier = Modifier.fillMaxSize().padding(24.dp)) {
         Column(
@@ -53,7 +65,6 @@ fun OnboardingFlow(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween,
         ) {
-            // Progress indicator (except on VPN permission)
             if (state.currentScreen != OnboardingScreen.VPN_PERMISSION) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
@@ -68,9 +79,14 @@ fun OnboardingFlow(
                             isCurrent -> MaterialTheme.colorScheme.primary
                             else -> MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                         }
+                        val animatedWidth by animateFloatAsState(
+                            targetValue = if (isCurrent) 40f else 8f,
+                            animationSpec = tween(300),
+                            label = "progress_width"
+                        )
                         Box(
                             modifier = Modifier
-                                .width(if (isCurrent) 40.dp else 8.dp)
+                                .width(animatedWidth.dp)
                                 .height(4.dp)
                                 .background(color, RoundedCornerShape(4.dp))
                                 .padding(horizontal = 2.dp),
@@ -80,47 +96,57 @@ fun OnboardingFlow(
                 }
             }
 
-            // Content
             Column(
                 modifier = Modifier.weight(1f).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                when (state.currentScreen) {
-                    OnboardingScreen.WELCOME -> WelcomeScreen()
-                    OnboardingScreen.PURPOSE -> PurposeScreen()
-                    OnboardingScreen.HOW_IT_WORKS -> HowItWorksScreen()
-                    OnboardingScreen.COMPANION_PIN -> CompanionPinScreen(state)
-                    OnboardingScreen.VPN_PERMISSION -> VpnPermissionScreen(
-                        state = state,
-                        onRequestPermission = onRequestVpnPermission,
-                        onFinish = onFinish,
-                    )
+                AnimatedContent(
+                    targetState = state.currentScreen,
+                    transitionSpec = {
+                        val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
+                        slideInHorizontally(animationSpec = tween(350)) { fullWidth -> fullWidth * dir / 3 } +
+                            fadeIn(animationSpec = tween(250)) togetherWith
+                        slideOutHorizontally(animationSpec = tween(350)) { fullWidth -> -fullWidth * dir / 3 } +
+                            fadeOut(animationSpec = tween(250))
+                    },
+                    label = "onboarding_page"
+                ) { screen ->
+                    when (screen) {
+                        OnboardingScreen.WELCOME -> WelcomeScreen()
+                        OnboardingScreen.PURPOSE -> PurposeScreen()
+                        OnboardingScreen.HOW_IT_WORKS -> HowItWorksScreen()
+                        OnboardingScreen.COMPANION_PIN -> CompanionPinScreen(state)
+                        OnboardingScreen.VPN_PERMISSION -> VpnPermissionScreen(
+                            state = state,
+                            onRequestPermission = onRequestVpnPermission,
+                            onFinish = onFinish,
+                        )
+                    }
                 }
             }
 
-            // Navigation
             if (state.currentScreen != OnboardingScreen.VPN_PERMISSION) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 16.dp, bottom = 32.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-            if (state.currentScreen != OnboardingScreen.WELCOME) {
-                TextButton(onClick = { state.back() }) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.ArrowForward, contentDescription = "Back", modifier = Modifier.size(18.dp))
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text("Back")
+                    if (state.currentScreen != OnboardingScreen.WELCOME) {
+                        TextButton(onClick = { state.back() }) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Back")
+                            }
+                        }
+                    } else {
+                        Spacer(modifier = Modifier.width(80.dp))
                     }
-                }
-            } else {
-                Spacer(modifier = Modifier.width(80.dp))
-            }
-            Button(onClick = { state.next() }) {
-                Text("Next")
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(Icons.Default.ArrowForward, contentDescription = "Next", modifier = Modifier.size(18.dp))
+                    Button(onClick = { state.next() }) {
+                        Text("Next")
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(Icons.AutoMirrored.Filled.ArrowForward, contentDescription = "Next", modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -131,11 +157,37 @@ fun OnboardingFlow(
 /* ────────────────────── Welcome Screen ────────────────────────────── */
 @Composable
 private fun WelcomeScreen() {
+    val infiniteTransition = rememberInfiniteTransition(label = "welcome_glow")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.06f,
+        targetValue = 0.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2000, easing = LinearEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow_alpha"
+    )
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth(),
     ) {
+        Box(
+            modifier = Modifier.size(120.dp).background(
+                MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha),
+                CircleShape
+            ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Default.Shield,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = "خُلُوَّات",
             style = MaterialTheme.typography.displayLarge.copy(
@@ -171,7 +223,10 @@ private fun WelcomeScreen() {
 /* ───────────────────── Purpose Screen ─────────────────────────────── */
 @Composable
 private fun PurposeScreen() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
         Text(
             text = "Why Khalawat?",
             style = MaterialTheme.typography.headlineLarge.copy(
@@ -199,7 +254,7 @@ private fun PurposeScreen() {
             border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 Text(
@@ -392,55 +447,165 @@ private fun VpnPermissionScreen(
     onRequestPermission: () -> Unit,
     onFinish: () -> Unit,
 ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Box(
-            modifier = Modifier.size(80.dp).background(
-                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(40.dp),
-            ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                Icons.Default.Shield, contentDescription = null,
-                modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary,
-            )
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            text = "Almost There!",
-            style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.primary),
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Khalawat needs VPN permission to intercept DNS requests.\n\nThis creates a local VPN on your device. No data is sent anywhere — all processing is local.",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                textAlign = TextAlign.Center,
-                lineHeight = 22.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
-        )
-        Spacer(modifier = Modifier.height(32.dp))
+    var isActivating by remember { mutableStateOf(false) }
+    var isActivated by remember { mutableStateOf(false) }
 
-        if (!state.vpnPermissionGranted) {
-            Button(
-                onClick = onRequestPermission,
-                modifier = Modifier.fillMaxWidth(0.8f).height(48.dp),
-                shape = RoundedCornerShape(24.dp),
-            ) {
-                Icon(Icons.Default.VpnKey, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Grant VPN Permission")
+    LaunchedEffect(state.vpnPermissionGranted) {
+        if (state.vpnPermissionGranted && !isActivated) {
+            isActivating = true
+            delay(2000)
+            isActivating = false
+            isActivated = true
+        }
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        when {
+            isActivating -> {
+                val infiniteTransition = rememberInfiniteTransition(label = "activating_pulse")
+                val pulseScale by infiniteTransition.animateFloat(
+                    initialValue = 0.9f,
+                    targetValue = 1.1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(800, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "pulse_scale"
+                )
+                val pulseAlpha by infiniteTransition.animateFloat(
+                    initialValue = 0.2f,
+                    targetValue = 0.5f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(800, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "pulse_alpha"
+                )
+                Box(
+                    modifier = Modifier.size(100.dp).scale(pulseScale).background(
+                        MaterialTheme.colorScheme.primary.copy(alpha = pulseAlpha),
+                        CircleShape
+                    ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 3.dp,
+                        modifier = Modifier.size(40.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Activating Protection…",
+                    style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.primary),
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Setting up your local VPN shield",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
+                )
             }
-        } else {
-            Icon(Icons.Default.Check, contentDescription = "Permission granted", modifier = Modifier.size(64.dp), tint = MaterialTheme.colorScheme.primary)
-            Spacer(modifier = Modifier.height(16.dp))
-            Button(
-                onClick = onFinish,
-                modifier = Modifier.fillMaxWidth(0.8f).height(48.dp),
-                shape = RoundedCornerShape(24.dp),
-            ) {
-                Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Start Protecting")
+            isActivated -> {
+                val activatedGlow = rememberInfiniteTransition(label = "activated_glow")
+                val checkScale by animateFloatAsState(
+                    targetValue = 1f,
+                    animationSpec = tween(600),
+                    label = "check_scale"
+                )
+                val glowAlpha by activatedGlow.animateFloat(
+                    initialValue = 0.3f,
+                    targetValue = 0.1f,
+                    animationSpec = infiniteRepeatable(
+                        animation = tween(1500, easing = LinearEasing),
+                        repeatMode = RepeatMode.Reverse
+                    ),
+                    label = "glow"
+                )
+                Box(
+                    modifier = Modifier.size(100.dp).background(
+                        MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha),
+                        CircleShape
+                    ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Default.Check,
+                        contentDescription = "Protected",
+                        modifier = Modifier.size(56.dp).scale(checkScale),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "You're Protected!",
+                    style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.primary),
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                Text(
+                    text = "Khalawat is now actively guarding your device.",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+                Button(
+                    onClick = onFinish,
+                    modifier = Modifier.fillMaxWidth(0.8f).height(48.dp),
+                    shape = RoundedCornerShape(24.dp),
+                ) {
+                    Icon(Icons.Default.PlayArrow, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Start Protecting")
+                }
+            }
+            else -> {
+                Box(
+                    modifier = Modifier.size(80.dp).background(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), RoundedCornerShape(40.dp),
+                    ),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(
+                        Icons.Default.Shield, contentDescription = null,
+                        modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary,
+                    )
+                }
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    text = "Almost There!",
+                    style = MaterialTheme.typography.headlineLarge.copy(color = MaterialTheme.colorScheme.primary),
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = "Khalawat needs VPN permission to intercept DNS requests.\n\nThis creates a local VPN on your device. No data is sent anywhere — all processing is local.",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        textAlign = TextAlign.Center,
+                        lineHeight = 22.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    ),
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+
+                if (!state.vpnPermissionGranted) {
+                    Button(
+                        onClick = {
+                            onRequestPermission()
+                        },
+                        modifier = Modifier.fillMaxWidth(0.8f).height(48.dp),
+                        shape = RoundedCornerShape(24.dp),
+                    ) {
+                        Icon(Icons.Default.VpnKey, contentDescription = null, modifier = Modifier.size(20.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Grant VPN Permission")
+                    }
+                }
             }
         }
     }

@@ -41,6 +41,8 @@ class KhalawatVpnService : VpnService() {
         const val VPN_MTU = 1500
         const val ACTION_START = "com.khalawat.android.action.START_VPN"
         const val ACTION_STOP = "com.khalawat.android.action.STOP_VPN"
+        const val ACTION_VPN_STARTED = "com.khalawat.android.action.VPN_STARTED"
+        const val ACTION_VPN_STOPPED = "com.khalawat.android.action.VPN_STOPPED"
         const val NOTIFICATION_CHANNEL_ID = "khalawat_vpn"
         const val NOTIFICATION_ID = 1
         private const val TAG = "KhalawatVpn"
@@ -91,6 +93,7 @@ class KhalawatVpnService : VpnService() {
         startInterventionServer()
         startPacketLoop()
         startForegroundNotification()
+        broadcastVpnState(ACTION_VPN_STARTED)
         return START_STICKY
     }
 
@@ -297,5 +300,12 @@ class KhalawatVpnService : VpnService() {
         interventionServer = null
         vpnInterface?.close()
         vpnInterface = null
+        broadcastVpnState(ACTION_VPN_STOPPED)
+    }
+
+    private fun broadcastVpnState(action: String) {
+        val intent = Intent(action)
+        intent.setPackage(packageName)
+        sendBroadcast(intent)
     }
 }

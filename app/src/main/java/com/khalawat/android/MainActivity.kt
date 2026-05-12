@@ -1,12 +1,26 @@
 package com.khalawat.android
 
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.net.VpnService
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -24,6 +38,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var prefs: KhalawatPreferences
     private val onboardingState = OnboardingState()
     private val antiTamperState = AntiTamperState()
+    private var isVpnActiveState by mutableStateOf(false)
 
     private val vpnPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -33,22 +48,55 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val vpnStateReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            when (intent?.action) {
+                KhalawatVpnService.ACTION_VPN_STARTED -> {
+                    isVpnActiveState = true
+                    prefs.isVpnActive = true
+                }
+                KhalawatVpnService.ACTION_VPN_STOPPED -> {
+                    isVpnActiveState = false
+                    prefs.isVpnActive = false
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         prefs = KhalawatPreferences(this)
+        isVpnActiveState = prefs.isVpnActive
 
-        // Restore companion PIN into anti-tamper state
         prefs.companionPin?.let { antiTamperState.setCompanionPinRequired(it) }
+
+        val filter = IntentFilter().apply {
+            addAction(KhalawatVpnService.ACTION_VPN_STARTED)
+            addAction(KhalawatVpnService.ACTION_VPN_STOPPED)
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(vpnStateReceiver, filter, RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(vpnStateReceiver, filter)
+        }
+
+        if (prefs.isOnboardingComplete && !isVpnActiveState) {
+            val intent = VpnService.prepare(this)
+            if (intent == null) {
+                startVpn()
+            }
+        }
 
         setContent {
             KhalawatTheme {
                 Surface(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().systemBarsPadding(),
                     color = MaterialTheme.colorScheme.background
                 ) {
                     KhalawatApp(
                         isOnboardingComplete = prefs.isOnboardingComplete,
-                        isVpnActive = prefs.isVpnActive,
+                        isVpnActive = isVpnActiveState,
                         onboardingState = onboardingState,
                         antiTamperState = antiTamperState,
                         onRequestVpnPermission = { requestVpnPermission() },
@@ -61,12 +109,16 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        try { unregisterReceiver(vpnStateReceiver) } catch (_: Exception) {}
+    }
+
     private fun requestVpnPermission() {
         val intent = VpnService.prepare(this)
         if (intent != null) {
             vpnPermissionLauncher.launch(intent)
         } else {
-            // Permission already granted
             onVpnPermissionGranted()
         }
     }
@@ -94,7 +146,6 @@ class MainActivity : ComponentActivity() {
             action = KhalawatVpnService.ACTION_START
         }
         startService(intent)
-        prefs.isVpnActive = true
     }
 
     private fun stopVpn() {
@@ -102,22 +153,18 @@ class MainActivity : ComponentActivity() {
             action = KhalawatVpnService.ACTION_STOP
         }
         startService(intent)
+        isVpnActiveState = false
         prefs.isVpnActive = false
         antiTamperState.releaseHold()
     }
 }
 
-/**
- * Root composable for the Khalawat app.
- *
- * Key design: `showOnboarding` is derived from BOTH the persisted
- * `isOnboardingComplete` flag (from SharedPreferences) AND the live
- * `onboardingState.isComplete` (mutableStateOf). This ensures:
- * - Fresh installs always start onboarding
- * - Returning users (who completed onboarding previously) skip to dashboard
- * - Completing onboarding in the CURRENT session reactively dismisses it
- *   without any imperative "showOnboarding = false" call
- */
+sealed class AppScreen {
+    object Onboarding : AppScreen()
+    object Dashboard : AppScreen()
+    object Disable : AppScreen()
+}
+
 @Composable
 fun KhalawatApp(
     isOnboardingComplete: Boolean,
@@ -129,10 +176,6 @@ fun KhalawatApp(
     onStopVpn: () -> Unit,
     onClearOnboarding: () -> Unit = {}
 ) {
-    // showOnboarding is true only while onboarding has never been completed
-    // (neither in this session nor in a previous one).
-    // When onboardingState.isComplete becomes true (via grantVpnPermission),
-    // this reactive derivation automatically recomposes and hides onboarding.
     val showOnboarding by remember {
         derivedStateOf { !isOnboardingComplete && !onboardingState.isComplete }
     }
@@ -141,39 +184,56 @@ fun KhalawatApp(
     var currentStage by remember { mutableStateOf(EscalationStage.STAGE_1) }
     var overrideCount by remember { mutableStateOf(0) }
 
-    when {
-        showOnboarding -> {
-            OnboardingFlow(
-                state = onboardingState,
-                onRequestVpnPermission = onRequestVpnPermission,
-                onFinish = {
-                    // onFinish is called when user clicks "Start Protecting"
-                    // after VPN permission is granted. The reactive
-                    // derivedStateOf already hides onboarding, but we keep
-                    // this callback for any future side-effects.
-                }
-            )
-        }
-        showDisableScreen -> {
-            DisableScreen(
-                state = antiTamperState,
-                onDisable = {
-                    onStopVpn()
-                    showDisableScreen = false
-                },
-                onCancel = {
-                    showDisableScreen = false
-                }
-            )
-        }
-        else -> {
-            DashboardScreen(
-                isVpnActive = isVpnActive,
-                currentStage = currentStage,
-                overrideCountToday = overrideCount,
-                onToggleVpn = onStartVpn,
-                onShowDisable = { showDisableScreen = true }
-            )
+    val currentScreen = when {
+        showOnboarding -> AppScreen.Onboarding
+        showDisableScreen -> AppScreen.Disable
+        else -> AppScreen.Dashboard
+    }
+
+    val screenOrder = remember { listOf(AppScreen.Onboarding, AppScreen.Dashboard, AppScreen.Disable) }
+
+    AnimatedContent(
+        targetState = currentScreen,
+        transitionSpec = {
+            val fromIdx = screenOrder.indexOf(initialState)
+            val toIdx = screenOrder.indexOf(targetState)
+            val direction = if (toIdx > fromIdx) 1 else -1
+            slideInHorizontally(animationSpec = tween(400)) { fullWidth -> fullWidth * direction / 3 } +
+                fadeIn(animationSpec = tween(300)) togetherWith
+            slideOutHorizontally(animationSpec = tween(400)) { fullWidth -> -fullWidth * direction / 3 } +
+                fadeOut(animationSpec = tween(300))
+        },
+        label = "screen_transition"
+    ) { screen ->
+        when (screen) {
+            AppScreen.Onboarding -> {
+                OnboardingFlow(
+                    state = onboardingState,
+                    onRequestVpnPermission = onRequestVpnPermission,
+                    onFinish = { }
+                )
+            }
+            AppScreen.Disable -> {
+                DisableScreen(
+                    state = antiTamperState,
+                    onDisable = {
+                        onStopVpn()
+                        showDisableScreen = false
+                    },
+                    onCancel = {
+                        showDisableScreen = false
+                    }
+                )
+            }
+            AppScreen.Dashboard -> {
+                DashboardScreen(
+                    isVpnActive = isVpnActive,
+                    currentStage = currentStage,
+                    overrideCountToday = overrideCount,
+                    onToggleVpn = onStartVpn,
+                    onShowDisable = { showDisableScreen = true }
+                )
+            }
         }
     }
 }

@@ -3,7 +3,7 @@ package com.khalawat.android.ui.theme
 import androidx.compose.ui.graphics.Color
 
 // --- Light Theme Colors ---
-// Based on: dark mode desing (sage/gold light + warm parchment)
+// Based on: dark mode design (sage/gold light + warm parchment)
 val LightPrimary = Color(0xFF5d5f5b)
 val LightOnPrimary = Color(0xFFffffff)
 val LightPrimaryContainer = Color(0xFFf5f5f0)
@@ -30,7 +30,7 @@ val LightOutline = Color(0xFF757873)
 val LightOutlineVariant = Color(0xFFc5c7c1)
 
 // --- Dark Theme Colors ---
-// Based on: light mode desing (shadow to light / dark theme)
+// Based on: light mode design (shadow to light / dark theme)
 val DarkPrimary = Color(0xFFf2ca50)
 val DarkOnPrimary = Color(0xFF3c2f00)
 val DarkPrimaryContainer = Color(0xFFd4af37)
