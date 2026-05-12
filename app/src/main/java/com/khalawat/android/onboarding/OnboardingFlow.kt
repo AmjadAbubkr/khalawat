@@ -8,13 +8,24 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.autoMirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.VpnKey
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.Air
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -95,21 +106,21 @@ fun OnboardingFlow(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    if (state.currentScreen != OnboardingScreen.WELCOME) {
-                        TextButton(onClick = { state.back() }) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Icon(Icons.Default.ArrowForward, contentDescription = "Back", modifier = Modifier.size(18.dp))
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text("Back")
-                            }
-                        }
-                    } else {
-                        Spacer(modifier = Modifier.width(80.dp))
-                    }
-                    Button(onClick = { state.next() }) {
-                        Text("Next")
+            if (state.currentScreen != OnboardingScreen.WELCOME) {
+                TextButton(onClick = { state.back() }) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Default.ArrowForward, contentDescription = "Back", modifier = Modifier.size(18.dp))
                         Spacer(modifier = Modifier.width(4.dp))
-                        Icon(ArrowForward, contentDescription = "Next", modifier = Modifier.size(18.dp))
+                        Text("Back")
+                    }
+                }
+            } else {
+                Spacer(modifier = Modifier.width(80.dp))
+            }
+            Button(onClick = { state.next() }) {
+                Text("Next")
+                Spacer(modifier = Modifier.width(4.dp))
+                Icon(Icons.Default.ArrowForward, contentDescription = "Next", modifier = Modifier.size(18.dp))
                     }
                 }
             }
@@ -294,12 +305,8 @@ private fun StepRow(step: Step, stepNumber: Int) {
 @Composable
 private fun CompanionPinScreen(state: OnboardingState) {
     val focusManager = LocalFocusManager.current
-    var pinInput by rememberSaveable(state.companionPinEnabled) {
-        mutableStateOf(if (state.companionPinEnabled) (state.companionPin ?: "") else "")
-    }
-    var parentMsg by rememberSaveable(state.companionPinEnabled) {
-        mutableStateOf(if (state.companionPinEnabled) state.parentMessage else "")
-    }
+    var pinInput by rememberSaveable { mutableStateOf(state.companionPin ?: "") }
+    var parentMsg by rememberSaveable { mutableStateOf(state.parentMessage) }
 
     Text(
         text = "Companion PIN",
@@ -338,7 +345,7 @@ private fun CompanionPinScreen(state: OnboardingState) {
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = pinInput,
-            onValueChange = { new ->
+            onValueChange = { new: String ->
                 if (new.length <= 4 && new.all { it.isDigit() }) {
                     pinInput = new
                     if (new.length == 4) state.setCompanionPin(new)
@@ -351,7 +358,7 @@ private fun CompanionPinScreen(state: OnboardingState) {
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             shape = RoundedCornerShape(12.dp),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
             ),
@@ -359,9 +366,9 @@ private fun CompanionPinScreen(state: OnboardingState) {
         Spacer(modifier = Modifier.height(16.dp))
         OutlinedTextField(
             value = parentMsg,
-            onValueChange = {
-                parentMsg = it
-                state.updateParentMessage(it)
+            onValueChange = { new: String ->
+                parentMsg = new
+                state.updateParentMessage(new)
             },
             label = { Text("Custom message from parent") },
             modifier = Modifier.fillMaxWidth(0.8f),
@@ -370,7 +377,7 @@ private fun CompanionPinScreen(state: OnboardingState) {
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
             keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
             shape = RoundedCornerShape(12.dp),
-            colors = TextFieldDefaults.outlinedTextFieldColors(
+            colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
             ),
