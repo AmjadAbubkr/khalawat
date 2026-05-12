@@ -1,6 +1,7 @@
 package com.khalawat.android.antitamper
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -9,8 +10,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.animation.togetherWith
@@ -71,14 +70,22 @@ fun DisableScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(
-                text = "Are you sure?",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    color = MaterialTheme.colorScheme.onBackground,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                ),
-            )
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(
+                    animationSpec = tween(400, delayMillis = 0),
+                    initialOffsetY = { -it / 4 }
+                )
+            ) {
+                Text(
+                    text = "Are you sure?",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        color = MaterialTheme.colorScheme.onBackground,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    ),
+                )
+            }
             Spacer(modifier = Modifier.height(32.dp))
 
             if (state.spiritualReminder != null) {
@@ -94,54 +101,62 @@ fun DisableScreen(
                     label = "ayah_glow_alpha"
                 )
 
-                Card(
-                    modifier = Modifier.fillMaxWidth(0.85f),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = ayahGlowAlpha)
-                    ),
-                    shape = RoundedCornerShape(16.dp),
-                    border = androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
-                    ),
+                AnimatedVisibility(
+                    visible = true,
+                    enter = slideInVertically(
+                        animationSpec = tween(500, delayMillis = 100),
+                        initialOffsetY = { it / 6 }
+                    )
                 ) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(20.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
+                    Card(
+                        modifier = Modifier.fillMaxWidth(0.85f),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = ayahGlowAlpha)
+                        ),
+                        shape = RoundedCornerShape(16.dp),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)
+                        ),
                     ) {
-                        Text(
-                            text = r.arabic,
-                            fontSize = 22.sp,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 32.sp,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = r.translation,
-                            fontSize = 14.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        Text(
-                            text = r.source,
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
+                        Column(
+                            modifier = Modifier.fillMaxWidth().padding(20.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Text(
+                                text = r.arabic,
+                                fontSize = 22.sp,
+                                textAlign = TextAlign.Center,
+                                lineHeight = 32.sp,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = r.translation,
+                                fontSize = 14.sp,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                            Text(
+                                text = r.source,
+                                fontSize = 12.sp,
+                                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.5f),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
-            AnimatedContent(
-                targetState = state.isHoldComplete,
-                transitionSpec = {
-                    fadeIn(tween(300)) + slideInVertically(tween(300)) { it / 4 } togetherWith
-                    fadeOut(tween(200)) + slideOutVertically(tween(200)) { -it / 4 }
-                },
-                label = "disable_step"
+        AnimatedContent(
+            targetState = state.isHoldComplete,
+            transitionSpec = {
+                slideInVertically(tween(300)) { it / 4 } togetherWith
+                slideOutVertically(tween(300)) { -it / 4 }
+            },
+            label = "disable_step"
             ) { holdComplete ->
                 if (!holdComplete) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {

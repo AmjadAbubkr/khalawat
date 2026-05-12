@@ -1,6 +1,7 @@
 package com.khalawat.android.onboarding
 
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -8,10 +9,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -101,16 +101,14 @@ fun OnboardingFlow(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
-                AnimatedContent(
-                    targetState = state.currentScreen,
-                    transitionSpec = {
-                        val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
-                        slideInHorizontally(animationSpec = tween(350)) { fullWidth -> fullWidth * dir / 3 } +
-                            fadeIn(animationSpec = tween(250)) togetherWith
-                        slideOutHorizontally(animationSpec = tween(350)) { fullWidth -> -fullWidth * dir / 3 } +
-                            fadeOut(animationSpec = tween(250))
-                    },
-                    label = "onboarding_page"
+            AnimatedContent(
+                targetState = state.currentScreen,
+                transitionSpec = {
+                    val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
+                    slideInHorizontally(animationSpec = tween(350)) { fullWidth -> fullWidth * dir } togetherWith
+                    slideOutHorizontally(animationSpec = tween(350)) { fullWidth -> -fullWidth * dir }
+                },
+                label = "onboarding_page"
                 ) { screen ->
                     when (screen) {
                         OnboardingScreen.WELCOME -> WelcomeScreen()
@@ -173,50 +171,82 @@ private fun WelcomeScreen() {
         verticalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Box(
-            modifier = Modifier.size(120.dp).background(
-                MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha),
-                CircleShape
-            ),
-            contentAlignment = Alignment.Center,
-        ) {
-            Icon(
-                Icons.Default.Shield,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInVertically(
+                animationSpec = tween(500, delayMillis = 0),
+                initialOffsetY = { -it / 4 }
             )
+        ) {
+            Box(
+                modifier = Modifier.size(120.dp).background(
+                    MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha),
+                    CircleShape
+                ),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(
+                    Icons.Default.Shield,
+                    contentDescription = null,
+                    modifier = Modifier.size(48.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "خُلُوَّات",
-            style = MaterialTheme.typography.displayLarge.copy(
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center,
-            ),
-            modifier = Modifier.padding(bottom = 8.dp),
-        )
-        Text(
-            text = "Khalawat",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontSize = 28.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center,
-            ),
-            modifier = Modifier.padding(bottom = 24.dp),
-        )
-        Text(
-            text = "Your voluntary companion for digital self-discipline.\nPrivacy-first. No accounts. No tracking.\nJust you and your commitment to Allah.",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                textAlign = TextAlign.Center,
-                lineHeight = 24.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
-            modifier = Modifier.padding(horizontal = 16.dp),
-        )
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInVertically(
+                animationSpec = tween(500, delayMillis = 100),
+                initialOffsetY = { it / 6 }
+            )
+        ) {
+            Text(
+                text = "خُلُوَّات",
+                style = MaterialTheme.typography.displayLarge.copy(
+                    fontSize = 48.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                ),
+                modifier = Modifier.padding(bottom = 8.dp),
+            )
+        }
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInVertically(
+                animationSpec = tween(500, delayMillis = 200),
+                initialOffsetY = { it / 6 }
+            )
+        ) {
+            Text(
+                text = "Khalawat",
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = 28.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center,
+                ),
+                modifier = Modifier.padding(bottom = 24.dp),
+            )
+        }
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInVertically(
+                animationSpec = tween(500, delayMillis = 300),
+                initialOffsetY = { it / 6 }
+            )
+        ) {
+            Text(
+                text = "Your voluntary companion for digital self-discipline.\nPrivacy-first. No accounts. No tracking.\nJust you and your commitment to Allah.",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    textAlign = TextAlign.Center,
+                    lineHeight = 24.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+                modifier = Modifier.padding(horizontal = 16.dp),
+            )
+        }
     }
 }
 
@@ -227,53 +257,77 @@ private fun PurposeScreen() {
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Text(
-            text = "Why Khalawat?",
-            style = MaterialTheme.typography.headlineLarge.copy(
-                color = MaterialTheme.colorScheme.primary,
-                textAlign = TextAlign.Center,
-            ),
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "Khalawat helps you break the urge window when haram content appears.\n\nIt doesn't just block — it intervenes with spiritual reminders, breathing exercises, and escalating barriers that give you 1–3 minutes to choose the right path.",
-            style = MaterialTheme.typography.bodyMedium.copy(
-                textAlign = TextAlign.Center,
-                lineHeight = 22.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            ),
-            modifier = Modifier.padding(horizontal = 12.dp),
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Card(
-            modifier = Modifier.fillMaxWidth(0.9f),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-            ),
-            shape = RoundedCornerShape(16.dp),
-            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInVertically(
+                animationSpec = tween(400, delayMillis = 0),
+                initialOffsetY = { -it / 4 }
+            )
         ) {
-            Column(
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
+            Text(
+                text = "Why Khalawat?",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    color = MaterialTheme.colorScheme.primary,
+                    textAlign = TextAlign.Center,
+                ),
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInVertically(
+                animationSpec = tween(500, delayMillis = 100),
+                initialOffsetY = { it / 6 }
+            )
+        ) {
+            Text(
+                text = "Khalawat helps you break the urge window when haram content appears.\n\nIt doesn't just block — it intervenes with spiritual reminders, breathing exercises, and escalating barriers that give you 1–3 minutes to choose the right path.",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    textAlign = TextAlign.Center,
+                    lineHeight = 22.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                ),
+                modifier = Modifier.padding(horizontal = 12.dp),
+            )
+        }
+        Spacer(modifier = Modifier.height(24.dp))
+        AnimatedVisibility(
+            visible = true,
+            enter = slideInVertically(
+                animationSpec = tween(500, delayMillis = 200),
+                initialOffsetY = { it / 6 }
+            )
+        ) {
+            Card(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+                ),
+                shape = RoundedCornerShape(16.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
             ) {
-                Text(
-                    text = "كُلُّ ابْنِ آدَمَ خَطَّاءٌ",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        lineHeight = 36.sp,
-                    ),
-                    modifier = Modifier.fillMaxWidth(),
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "Every son of Adam sins — Tirmidhi 2499",
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
-                )
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        text = "كُلُّ ابْنِ آدَمَ خَطَّاءٌ",
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            lineHeight = 36.sp,
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Every son of Adam sins — Tirmidhi 2499",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
+                    )
+                }
             }
         }
     }
@@ -302,7 +356,15 @@ private fun HowItWorksScreen() {
         )
 
         steps.forEachIndexed { index, step ->
-            StepRow(step = step, stepNumber = index + 1)
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInVertically(
+                    animationSpec = tween(400, delayMillis = index * 80),
+                    initialOffsetY = { it / 6 }
+                )
+            ) {
+                StepRow(step = step, stepNumber = index + 1)
+            }
             if (index < steps.lastIndex) {
                 Spacer(modifier = Modifier.height(8.dp))
             }

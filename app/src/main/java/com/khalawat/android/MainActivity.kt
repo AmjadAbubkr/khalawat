@@ -1,11 +1,7 @@
 package com.khalawat.android
 
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.VpnService
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -14,8 +10,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
@@ -48,20 +42,18 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private val vpnStateReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context?, intent: Intent?) {
-            when (intent?.action) {
-                KhalawatVpnService.ACTION_VPN_STARTED -> {
-                    isVpnActiveState = true
-                    prefs.isVpnActive = true
-                    prefs.userStoppedVpn = false
-                }
-                KhalawatVpnService.ACTION_VPN_STOPPED -> {
-                    isVpnActiveState = false
-                    prefs.isVpnActive = false
-                    if (!prefs.userStoppedVpn && prefs.isOnboardingComplete) {
-                        startVpn()
-                    }
+    private val vpnStateCallback: (String) -> Unit = { action ->
+        when (action) {
+            KhalawatVpnService.ACTION_VPN_STARTED -> {
+                isVpnActiveState = true
+                prefs.isVpnActive = true
+                prefs.userStoppedVpn = false
+            }
+            KhalawatVpnService.ACTION_VPN_STOPPED -> {
+                isVpnActiveState = false
+                prefs.isVpnActive = false
+                if (!prefs.userStoppedVpn && prefs.isOnboardingComplete) {
+                    startVpn()
                 }
             }
         }
@@ -76,15 +68,7 @@ class MainActivity : ComponentActivity() {
         prefs.companionPin?.let { antiTamperState.setCompanionPinRequired(it) }
         antiTamperState.restoreDisconnectCount(prefs.disconnectCount)
 
-        val filter = IntentFilter().apply {
-            addAction(KhalawatVpnService.ACTION_VPN_STARTED)
-            addAction(KhalawatVpnService.ACTION_VPN_STOPPED)
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(vpnStateReceiver, filter, RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(vpnStateReceiver, filter)
-        }
+        KhalawatVpnService.onVpnStateChanged = vpnStateCallback
 
         if (prefs.isOnboardingComplete && !isVpnActiveState && !prefs.userStoppedVpn) {
             val intent = VpnService.prepare(this)
@@ -116,13 +100,13 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (prefs.isOnboardingComplete && !prefs.userStoppedVpn) {
+        if (prefs.isOnboardingComplete) {
             val vpnActive = KhalawatVpnService.isRunning
             if (isVpnActiveState != vpnActive) {
                 isVpnActiveState = vpnActive
                 prefs.isVpnActive = vpnActive
             }
-            if (!vpnActive) {
+            if (!vpnActive && !prefs.userStoppedVpn) {
                 val intent = VpnService.prepare(this)
                 if (intent == null) {
                     startVpn()
@@ -134,7 +118,7 @@ class MainActivity : ComponentActivity() {
     override fun onDestroy() {
         super.onDestroy()
         prefs.disconnectCount = antiTamperState.disconnectCount
-        try { unregisterReceiver(vpnStateReceiver) } catch (_: Exception) {}
+        KhalawatVpnService.onVpnStateChanged = null
     }
 
     private fun requestVpnPermission() {
@@ -225,10 +209,8 @@ fun KhalawatApp(
             val fromIdx = screenOrder.indexOf(initialState)
             val toIdx = screenOrder.indexOf(targetState)
             val direction = if (toIdx > fromIdx) 1 else -1
-            slideInHorizontally(animationSpec = tween(400)) { fullWidth -> fullWidth * direction / 3 } +
-                fadeIn(animationSpec = tween(300)) togetherWith
-            slideOutHorizontally(animationSpec = tween(400)) { fullWidth -> -fullWidth * direction / 3 } +
-                fadeOut(animationSpec = tween(300))
+            slideInHorizontally(animationSpec = tween(350)) { fullWidth -> fullWidth * direction } togetherWith
+            slideOutHorizontally(animationSpec = tween(350)) { fullWidth -> -fullWidth * direction }
         },
         label = "screen_transition"
     ) { screen ->
@@ -253,20 +235,20 @@ fun KhalawatApp(
                 )
             }
             AppScreen.Dashboard -> {
-                    DashboardScreen(
-                        isVpnActive = isVpnActive,
-                        currentStage = currentStage,
-                        overrideCountToday = overrideCount,
-                        onToggleVpn = {
-                            if (isVpnActive) {
-                                showDisableScreen = true
-                            } else {
-                                onStartVpn()
-                            }
-                        },
-                        onShowDisable = { showDisableScreen = true }
-                    )
-                }
+                DashboardScreen(
+                    isVpnActive = isVpnActive,
+                    currentStage = currentStage,
+                    overrideCountToday = overrideCount,
+                    onToggleVpn = {
+                        if (isVpnActive) {
+                            showDisableScreen = true
+                        } else {
+                            onStartVpn()
+                        }
+                    },
+                    onShowDisable = { showDisableScreen = true }
+                )
+            }
         }
     }
 }

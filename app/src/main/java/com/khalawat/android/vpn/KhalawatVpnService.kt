@@ -50,6 +50,22 @@ class KhalawatVpnService : VpnService() {
         @Volatile
         var isRunning: Boolean = false
             private set
+
+        var onVpnStateChanged: ((String) -> Unit)? = null
+
+        private val LOOPBACK_EXCLUDE_ROUTES = listOf(
+            "0.0.0.0" to 5,
+            "8.0.0.0" to 7,
+            "16.0.0.0" to 4,
+            "32.0.0.0" to 3,
+            "64.0.0.0" to 3,
+            "96.0.0.0" to 4,
+            "112.0.0.0" to 5,
+            "120.0.0.0" to 6,
+            "124.0.0.0" to 7,
+            "126.0.0.0" to 8,
+            "128.0.0.0" to 1,
+        )
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
@@ -113,14 +129,18 @@ class KhalawatVpnService : VpnService() {
     }
 
     private fun setupVpn() {
-        vpnInterface = Builder()
+        val builder = Builder()
             .setSession("Khalawat")
             .addAddress(VPN_ADDRESS, 32)
-            .addRoute(VPN_ROUTE, 0)
             .addDnsServer("8.8.8.8")
             .setMtu(VPN_MTU)
             .addDisallowedApplication(packageName)
-            .establish()
+
+        for (route in LOOPBACK_EXCLUDE_ROUTES) {
+            builder.addRoute(route.first, route.second)
+        }
+
+        vpnInterface = builder.establish()
     }
 
     private fun startInterventionServer() {
@@ -310,6 +330,7 @@ class KhalawatVpnService : VpnService() {
     }
 
     private fun broadcastVpnState(action: String) {
+        onVpnStateChanged?.invoke(action)
         val intent = Intent(action)
         intent.setPackage(packageName)
         sendBroadcast(intent)
