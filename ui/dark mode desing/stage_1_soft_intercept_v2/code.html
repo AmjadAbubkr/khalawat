@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Take a Moment - Soft Intercept</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#f1edec",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#b4cdb1",
+                        "on-primary-container": "#6f706c",
+                        "on-secondary-container": "#536a53",
+                        "surface-dim": "#ddd9d8",
+                        "outline-variant": "#c5c7c1",
+                        "inverse-surface": "#313030",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffe088",
+                        "surface-bright": "#fcf8f7",
+                        "secondary-container": "#cfeacc",
+                        "error-container": "#ffdad6",
+                        "surface": "#fcf8f7",
+                        "tertiary": "#735c00",
+                        "on-tertiary-fixed": "#241a00",
+                        "on-secondary-fixed-variant": "#364c36",
+                        "primary-fixed-dim": "#c6c7c2",
+                        "on-background": "#1c1b1b",
+                        "tertiary-container": "#fff4de",
+                        "surface-tint": "#5d5f5b",
+                        "on-primary-fixed-variant": "#454744",
+                        "surface-container-high": "#ebe7e6",
+                        "primary-fixed": "#e3e3de",
+                        "on-tertiary-container": "#886c00",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline": "#757873",
+                        "on-tertiary-fixed-variant": "#574500",
+                        "secondary-fixed": "#cfeacc",
+                        "on-primary-fixed": "#1a1c19",
+                        "primary-container": "#f5f5f0",
+                        "tertiary-fixed-dim": "#e9c349",
+                        "background": "#fcf8f7",
+                        "on-surface-variant": "#454843",
+                        "inverse-primary": "#c6c7c2",
+                        "on-surface": "#1c1b1b",
+                        "primary": "#5d5f5b",
+                        "on-error": "#ffffff",
+                        "secondary": "#4d644d",
+                        "surface-container-low": "#f7f3f2",
+                        "surface-container-highest": "#e5e2e1",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e5e2e1",
+                        "inverse-on-surface": "#f4f0ef",
+                        "on-secondary-fixed": "#0b200e"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "container-max": "1120px",
+                        "unit": "8px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "margin-desktop": "64px"
+                    },
+                    fontFamily: {
+                        "headline-lg-mobile": ["Newsreader", "serif"],
+                        "body-lg": ["Newsreader", "serif"],
+                        "label-sm": ["Newsreader", "serif"],
+                        "headline-md": ["Newsreader", "serif"],
+                        "body-md": ["Newsreader", "serif"],
+                        "label-lg": ["Newsreader", "serif"],
+                        "display": ["Newsreader", "serif"],
+                        "headline-lg": ["Newsreader", "serif"]
+                    },
+                    fontSize: {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface antialiased min-h-screen flex items-center justify-center p-margin-mobile md:p-margin-desktop selection:bg-secondary-container selection:text-secondary-fixed">
+<!-- 
+      Navigation is suppressed as this is an Interstitial/Task-Focused intervention screen.
+      The goal is to focus the user entirely on the reflection canvas without "escape hatches" 
+      other than the intentional actions provided.
+    -->
+<main class="w-full max-w-2xl relative flex flex-col items-center justify-center border border-secondary/15 rounded-xl bg-surface-bright py-20 md:py-28 px-6 md:px-12 text-center" style="min-height: 70vh;">
+<!-- The "Gold Thread" Accent -->
+<div class="absolute top-0 left-0 w-full h-[2px] bg-tertiary-fixed-dim rounded-t-xl opacity-80"></div>
+<!-- Status Message -->
+<p class="font-headline-md text-headline-md text-secondary/70 mb-12">
+            Take a moment to reflect...
+        </p>
+<!-- Quranic Ayah Container -->
+<div class="mb-16 max-w-lg mx-auto">
+<h1 class="font-display text-display text-secondary leading-relaxed mb-6" dir="rtl" style="line-height: 1.5;">
+                أَلَا بِذِكْرِ ٱللَّهِ تَطْمَئِنُّ ٱلْقُلُوبُ
+            </h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant italic">
+                "Verily, in the remembrance of Allah do hearts find rest."
+            </p>
+<p class="font-label-sm text-label-sm text-secondary/50 mt-3 uppercase tracking-widest">
+                Quran 13:28
+            </p>
+</div>
+<!-- Circular Countdown Timer -->
+<div class="relative w-36 h-36 mb-16 flex flex-col items-center justify-center group">
+<svg class="absolute inset-0 w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<!-- Background track -->
+<circle class="text-secondary/10" cx="50" cy="50" fill="none" r="47" stroke="currentColor" stroke-width="1.5"></circle>
+<!-- Progress ring (Static representation of a running timer) -->
+<circle class="text-secondary" cx="50" cy="50" fill="none" r="47" stroke="currentColor" stroke-dasharray="295" stroke-dashoffset="110" stroke-linecap="round" stroke-width="2"></circle>
+</svg>
+<div class="flex flex-col items-center mt-1">
+<span class="font-display text-display text-secondary leading-none">15</span>
+<span class="font-label-sm text-label-sm text-secondary/60 uppercase tracking-widest mt-1">Sec</span>
+</div>
+</div>
+<!-- Primary Action -->
+<button class="bg-tertiary-fixed-dim text-secondary font-label-lg text-label-lg px-10 py-4 rounded-lg hover:opacity-90 hover:bg-tertiary-fixed transition-all duration-300 flex items-center gap-3">
+<span class="material-symbols-outlined" style="font-size: 20px;">spa</span>
+            Go Back to Peace
+        </button>
+<!-- Subtle Bypass Option -->
+<button class="mt-10 font-label-sm text-label-sm text-secondary/40 hover:text-secondary/70 transition-colors border-b border-transparent hover:border-secondary/30 pb-0.5">
+            Continue anyway
+        </button>
+</main>
+</body></html>

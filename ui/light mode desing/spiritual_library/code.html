@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Library - Khalawat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&amp;family=Noto+Serif:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary": "#203527",
+                        "surface-tint": "#e9c349",
+                        "on-surface-variant": "#d0c5af",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "on-error-container": "#ffdad6",
+                        "inverse-surface": "#e5e2e1",
+                        "inverse-primary": "#735c00",
+                        "tertiary": "#c6cee8",
+                        "tertiary-fixed": "#dae2fd",
+                        "surface-bright": "#393939",
+                        "secondary-fixed-dim": "#b4cdb8",
+                        "surface-dim": "#131313",
+                        "surface-container-high": "#2a2a2a",
+                        "on-surface": "#e5e2e1",
+                        "on-primary-fixed": "#241a00",
+                        "on-tertiary": "#283044",
+                        "primary-container": "#d4af37",
+                        "secondary": "#b4cdb8",
+                        "outline": "#99907c",
+                        "primary-fixed": "#ffe088",
+                        "surface": "#131313",
+                        "primary-fixed-dim": "#e9c349",
+                        "on-primary-container": "#554300",
+                        "surface-variant": "#353534",
+                        "on-background": "#e5e2e1",
+                        "on-primary-fixed-variant": "#574500",
+                        "outline-variant": "#4d4635",
+                        "on-tertiary-fixed": "#131b2e",
+                        "inverse-on-surface": "#313030",
+                        "on-error": "#690005",
+                        "error-container": "#93000a",
+                        "on-secondary-container": "#a3bba7",
+                        "on-tertiary-container": "#3d455a",
+                        "secondary-container": "#364c3c",
+                        "surface-container-low": "#1c1b1b",
+                        "on-secondary-fixed": "#0b2013",
+                        "on-secondary-fixed-variant": "#364c3c",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "background": "#131313",
+                        "tertiary-container": "#abb2cc",
+                        "primary": "#f2ca50",
+                        "error": "#ffb4ab",
+                        "surface-container-highest": "#353534",
+                        "surface-container-lowest": "#0e0e0e",
+                        "secondary-fixed": "#d0e9d4",
+                        "on-primary": "#3c2f00",
+                        "surface-container": "#201f1f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "32px",
+                        "container-padding-desktop": "40px",
+                        "base": "8px",
+                        "gutter": "16px",
+                        "container-padding-mobile": "20px"
+                    },
+                    "fontFamily": {
+                        "display-lg": ["Newsreader"],
+                        "quote-arabic": ["Noto Serif"],
+                        "body-md": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "headline-sm": ["Newsreader"],
+                        "headline-md": ["Newsreader"],
+                        "label-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "quote-arabic": ["24px", { "lineHeight": "40px", "fontWeight": "400" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "headline-sm": ["22px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-md": ["28px", { "lineHeight": "36px", "fontWeight": "500" }],
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: theme('colors.background');
+            color: theme('colors.on-background');
+        }
+        .scrim-gradient {
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.8) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="antialiased min-h-screen flex flex-col font-body-md text-body-md pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 flex justify-between items-center px-container-mobile h-16 bg-surface/80 backdrop-blur-xl dark:bg-surface/80 border-b border-outline-variant/30 hidden md:flex">
+<div class="flex items-center text-primary dark:text-primary-fixed-dim hover:bg-surface-variant/50 transition-colors rounded-full p-2 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="shield_lock" data-weight="fill" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+</div>
+<div class="font-display-lg text-headline-md text-primary tracking-tight font-bold">
+            Khalawat
+        </div>
+<div class="flex items-center text-primary dark:text-primary-fixed-dim hover:bg-surface-variant/50 transition-colors rounded-full p-2 cursor-pointer">
+<span class="material-symbols-outlined" data-icon="wb_sunny">wb_sunny</span>
+</div>
+</header>
+<!-- Mobile Header Placeholder (to avoid content jump on mobile) -->
+<div class="md:hidden h-16 w-full flex items-center justify-center border-b border-outline-variant/30 bg-surface/80 backdrop-blur-xl fixed top-0 z-40">
+<div class="font-display-lg text-headline-md text-primary tracking-tight font-bold">
+            Khalawat
+        </div>
+</div>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center pt-24 px-container-mobile w-full max-w-[1200px] mx-auto relative">
+<!-- Scrim -->
+<div class="fixed inset-0 pointer-events-none scrim-gradient z-[-1]"></div>
+<!-- Search Section -->
+<section class="w-full max-w-[680px] mb-section-gap relative">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full bg-surface-container-high/50 backdrop-blur-sm border-0 border-b border-outline-variant focus:border-primary focus:ring-0 text-on-surface placeholder:text-on-surface-variant py-4 pl-12 pr-4 transition-colors font-body-md outline-none" placeholder="Search spiritual vitamins..." type="text"/>
+</div>
+</section>
+<!-- Categories / Chips -->
+<section class="w-full mb-section-gap flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+<button class="px-6 py-2 rounded-full border border-primary text-primary bg-primary/10 font-label-md text-label-md whitespace-nowrap flex-shrink-0 transition-all hover:bg-primary/20">All</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant bg-surface-container-high/50 font-label-md text-label-md whitespace-nowrap flex-shrink-0 transition-all hover:border-primary/50 hover:text-primary">Patience</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant bg-surface-container-high/50 font-label-md text-label-md whitespace-nowrap flex-shrink-0 transition-all hover:border-primary/50 hover:text-primary">Sincerity</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant bg-surface-container-high/50 font-label-md text-label-md whitespace-nowrap flex-shrink-0 transition-all hover:border-primary/50 hover:text-primary">Purity</button>
+<button class="px-6 py-2 rounded-full border border-outline-variant text-on-surface-variant bg-surface-container-high/50 font-label-md text-label-md whitespace-nowrap flex-shrink-0 transition-all hover:border-primary/50 hover:text-primary">Gratitude</button>
+</section>
+<!-- Bento Grid / Cards Section -->
+<section class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Card 1 -->
+<div class="bg-surface-container-high/40 backdrop-blur-md rounded-xl p-6 border border-outline-variant/30 hover:border-primary/50 transition-all group relative overflow-hidden flex flex-col justify-between min-h-[240px]">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div>
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center mb-4 border border-outline-variant/50 group-hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="water_drop">water_drop</span>
+</div>
+<span class="text-primary font-label-md text-label-md mb-2 block">Purity</span>
+<p class="font-quote-arabic text-quote-arabic text-on-surface leading-relaxed mb-4" dir="rtl">
+                        إِنَّ اللَّهَ يُحِبُّ التَّوَّابِينَ وَيُحِبُّ الْمُتَطَهِّرِينَ
+                    </p>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant opacity-80 line-clamp-2">
+                    "Indeed, Allah loves those who are constantly repentant and loves those who purify themselves."
+                </p>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-high/40 backdrop-blur-md rounded-xl p-6 border border-outline-variant/30 hover:border-primary/50 transition-all group relative overflow-hidden flex flex-col justify-between min-h-[240px]">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div>
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center mb-4 border border-outline-variant/50 group-hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="hourglass_empty">hourglass_empty</span>
+</div>
+<span class="text-primary font-label-md text-label-md mb-2 block">Patience</span>
+<p class="font-quote-arabic text-quote-arabic text-on-surface leading-relaxed mb-4" dir="rtl">
+                        وَاصْبِرْ وَمَا صَبْرُكَ إِلَّا بِاللَّهِ
+                    </p>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant opacity-80 line-clamp-2">
+                    "And be patient, and your patience is not but through Allah."
+                </p>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-high/40 backdrop-blur-md rounded-xl p-6 border border-outline-variant/30 hover:border-primary/50 transition-all group relative overflow-hidden flex flex-col justify-between min-h-[240px]">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+<div>
+<div class="w-12 h-12 rounded-full bg-surface-container-lowest flex items-center justify-center mb-4 border border-outline-variant/50 group-hover:border-primary/50 transition-colors">
+<span class="material-symbols-outlined text-primary" data-icon="favorite_border">favorite_border</span>
+</div>
+<span class="text-primary font-label-md text-label-md mb-2 block">Sincerity</span>
+<p class="font-quote-arabic text-quote-arabic text-on-surface leading-relaxed mb-4" dir="rtl">
+                        إِنَّمَا الْأَعْمَالُ بِالنِّيَّاتِ
+                    </p>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant opacity-80 line-clamp-2">
+                    "Actions are judged by intentions."
+                </p>
+</div>
+<!-- Card 4 (Featured/Wider) -->
+<div class="md:col-span-2 lg:col-span-3 bg-surface-container-high/30 backdrop-blur-md rounded-xl border border-outline-variant/30 overflow-hidden group flex flex-col md:flex-row relative">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
+<div class="w-full md:w-1/3 h-48 md:h-auto relative z-10">
+<img alt="Serene space" class="w-full h-full object-cover opacity-80" data-alt="A serene, shadowy architectural space with a single shaft of glowing golden light illuminating a quiet corner, evoking a sense of spiritual introspection, deep focus, and the transition from darkness to light. The color palette features deep charcoal, midnight blues, and luminous gold accents." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBRzD4uJoBbr_Gg9ZF_Wnx3hEQ6x98ZU09DMy5OWBrwzDXMEmt4TvWtJxUU7iQY89jSpQyPcUnqEMWGTAeOYnqqXTMWuKufCvlbjsuKdWSkbXaE42J1-SN5B8bJEJw_Y41lhSbNKX_Ry4BMOvib2w6JMEuV9y3Ex0xhu9x_djkr0PJ_Mf4YKjLZlaFA5-aOslpmodvvAMbZ8G7_A6njgL_hMMH8XlXciJK2HhIG5lCoZsRB3H5rqxx5-FuN4DkKbCHKKxhBdbbQUOSb"/>
+</div>
+<div class="p-8 flex flex-col justify-center relative z-10 w-full md:w-2/3">
+<span class="text-primary font-label-md text-label-md mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">flare</span> Daily Reflection
+                    </span>
+<p class="font-headline-md text-headline-md text-on-surface mb-4">
+                        The Light Within the Shadow
+                    </p>
+<p class="font-body-md text-body-md text-on-surface-variant mb-6 max-w-2xl">
+                        A guided contemplation on finding strength in moments of isolation, turning quiet struggles into profound spiritual growth.
+                    </p>
+<button class="self-start px-6 py-2 rounded-full bg-primary text-on-primary font-label-md text-label-md hover:bg-primary-fixed transition-colors shadow-[0_0_15px_rgba(212,175,55,0.2)] hover:shadow-[0_0_20px_rgba(212,175,55,0.4)]">
+                        Read Reflection
+                    </button>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-surface/90 backdrop-blur-2xl dark:bg-surface/90 rounded-t-xl bg-gradient-to-t from-surface-container-highest to-transparent shadow-[0_-4px_20px_rgba(0,0,0,0.5)] md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:opacity-100" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="temple_hindu">temple_hindu</span>
+<span class="font-body-md text-label-md">Peace</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-primary-container/10 rounded-full px-4 py-1 transition-all transform scale-110 duration-300 ease-out" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="auto_stories" data-weight="fill" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span class="font-body-md text-label-md">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:opacity-100" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="settings_account_box">settings_account_box</span>
+<span class="font-body-md text-label-md">Self</span>
+</a>
+</nav>
+</body></html>

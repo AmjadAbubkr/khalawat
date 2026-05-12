@@ -1,113 +1,152 @@
 package com.khalawat.android.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Shield
-import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.khalawat.android.antitamper.AntiTamperState
-import com.khalawat.android.antitamper.DisableScreen
 import com.khalawat.android.escalation.EscalationStage
 
-/**
- * Main dashboard shown when VPN is active.
- */
 @Composable
 fun DashboardScreen(
     isVpnActive: Boolean,
     currentStage: EscalationStage,
     overrideCountToday: Int,
     onToggleVpn: () -> Unit,
-    onShowDisable: () -> Unit
+    onShowDisable: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Status indicator
-        val statusColor = if (isVpnActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
-        val statusText = if (isVpnActive) "Protected" else "Unprotected"
-
-        Surface(
-            shape = MaterialTheme.shapes.large,
-            color = statusColor.copy(alpha = 0.15f),
-            modifier = Modifier.size(180.dp),
-            tonalElevation = 2.dp
+    Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp)) {
+        Column(
+            modifier = Modifier.fillMaxSize().padding(top = 40.dp, bottom = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top,
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+            // Top greeting row
+            Row(
+                modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Icon(
-                    imageVector = if (isVpnActive) Icons.Default.Shield else Icons.Default.Warning,
-                    contentDescription = statusText,
-                    modifier = Modifier.size(64.dp),
-                    tint = statusColor
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = statusText,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = statusColor
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Stats card
-        Card(modifier = Modifier.fillMaxWidth(0.85f)) {
-            Column(
-                modifier = Modifier.padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Text("Today's Stats", fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
-                ) {
-                    StatItem("Interventions", overrideCountToday.toString())
-                    StatItem("Current Level", stageLabel(currentStage))
+                Column {
+                    Text(
+                        text = "Assalamu Alaikum",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            color = MaterialTheme.colorScheme.onBackground,
+                            fontWeight = FontWeight.Medium,
+                        ),
+                    )
+                    Text(
+                        text = "Peace and clarity upon your path.",
+                        style = MaterialTheme.typography.bodySmall.copy(color = MaterialTheme.colorScheme.onSurfaceVariant),
+                    )
                 }
             }
-        }
+            Spacer(modifier = Modifier.height(40.dp))
 
-        Spacer(modifier = Modifier.height(32.dp))
+            // Status halo
+            val statusColor = if (isVpnActive) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+            val statusText = if (isVpnActive) "Protected" else "Unprotected"
+            val statusIcon = if (isVpnActive) Icons.Default.Shield else Icons.Default.Warning
 
-        // VPN toggle
-        Button(
-            onClick = {
-                if (isVpnActive) onShowDisable() else onToggleVpn()
-            },
-            modifier = Modifier
-                .fillMaxWidth(0.7f)
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = if (isVpnActive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-            )
-        ) {
-            Text(if (isVpnActive) "Disable Khalawat" else "Start Protection")
+            Box(modifier = Modifier.size(240.dp), contentAlignment = Alignment.Center) {
+                // subtle outer halo behind
+                Box(
+                    modifier = Modifier.matchParentSize()
+                        .background(statusColor.copy(alpha = 0.06f), CircleShape)
+                )
+                // breathing or ambient circle
+                if (isVpnActive) {
+                    Box(
+                        modifier = Modifier.size(200.dp)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f), CircleShape),
+                    )
+                }
+                // core surface
+                Surface(
+                    shape = CircleShape,
+                    color = if (isVpnActive) MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.2f),
+                    tonalElevation = 4.dp,
+                    modifier = Modifier.size(150.dp),
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center,
+                    ) {
+                        Icon(
+                            imageVector = statusIcon, contentDescription = statusText,
+                            modifier = Modifier.size(48.dp), tint = statusColor,
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = statusText, fontSize = 18.sp, fontWeight = FontWeight.SemiBold,
+                            color = statusColor, textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(36.dp))
+
+            // Intervention stats
+            Card(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)),
+            ) {
+                Column(modifier = Modifier.padding(20.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        "Today's Discipline", style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        ),
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
+                        DashboardStatItem("Interventions", overrideCountToday.toString())
+                        DashboardStatItem("Current Level", stageLabel(currentStage))
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(36.dp))
+
+            // Toggle
+            Button(
+                onClick = { if (isVpnActive) onShowDisable() else onToggleVpn() },
+                modifier = Modifier.fillMaxWidth(0.75f).height(52.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = if (isVpnActive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                ),
+                shape = RoundedCornerShape(28.dp),
+            ) {
+                Icon(
+                    if (isVpnActive) Icons.Default.PowerSettingsNew else Icons.Default.Lock,
+                    contentDescription = null, modifier = Modifier.size(20.dp),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(if (isVpnActive) "Disable Khalawat" else "Enable Shield")
+            }
         }
     }
 }
 
 @Composable
-private fun StatItem(label: String, value: String) {
+private fun DashboardStatItem(label: String, value: String) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(value, fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        Text(label, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(
+            value, fontSize = 24.sp, fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(label, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
     }
 }
 

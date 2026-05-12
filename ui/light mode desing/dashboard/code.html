@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Khalawat - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&amp;family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&amp;family=Noto+Serif:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary": "#203527",
+                    "surface-tint": "#e9c349",
+                    "on-surface-variant": "#d0c5af",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "on-error-container": "#ffdad6",
+                    "inverse-surface": "#e5e2e1",
+                    "inverse-primary": "#735c00",
+                    "tertiary": "#c6cee8",
+                    "tertiary-fixed": "#dae2fd",
+                    "surface-bright": "#393939",
+                    "secondary-fixed-dim": "#b4cdb8",
+                    "surface-dim": "#131313",
+                    "surface-container-high": "#2a2a2a",
+                    "on-surface": "#e5e2e1",
+                    "on-primary-fixed": "#241a00",
+                    "on-tertiary": "#283044",
+                    "primary-container": "#d4af37",
+                    "secondary": "#b4cdb8",
+                    "outline": "#99907c",
+                    "primary-fixed": "#ffe088",
+                    "surface": "#131313",
+                    "primary-fixed-dim": "#e9c349",
+                    "on-primary-container": "#554300",
+                    "surface-variant": "#353534",
+                    "on-background": "#e5e2e1",
+                    "on-primary-fixed-variant": "#574500",
+                    "outline-variant": "#4d4635",
+                    "on-tertiary-fixed": "#131b2e",
+                    "inverse-on-surface": "#313030",
+                    "on-error": "#690005",
+                    "error-container": "#93000a",
+                    "on-secondary-container": "#a3bba7",
+                    "on-tertiary-container": "#3d455a",
+                    "secondary-container": "#364c3c",
+                    "surface-container-low": "#1c1b1b",
+                    "on-secondary-fixed": "#0b2013",
+                    "on-secondary-fixed-variant": "#364c3c",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "background": "#131313",
+                    "tertiary-container": "#abb2cc",
+                    "primary": "#f2ca50",
+                    "error": "#ffb4ab",
+                    "surface-container-highest": "#353534",
+                    "surface-container-lowest": "#0e0e0e",
+                    "secondary-fixed": "#d0e9d4",
+                    "on-primary": "#3c2f00",
+                    "surface-container": "#201f1f"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "32px",
+                    "container-padding-desktop": "40px",
+                    "base": "8px",
+                    "gutter": "16px",
+                    "container-padding-mobile": "20px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Newsreader", "serif"],
+                    "quote-arabic": ["Noto Serif", "serif"],
+                    "body-md": ["Manrope", "sans-serif"],
+                    "body-lg": ["Manrope", "sans-serif"],
+                    "headline-sm": ["Newsreader", "serif"],
+                    "headline-md": ["Newsreader", "serif"],
+                    "label-md": ["Manrope", "sans-serif"]
+            },
+            "fontSize": {
+                    "display-lg": ["40px", {"lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "quote-arabic": ["24px", {"lineHeight": "40px", "fontWeight": "400"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-sm": ["22px", {"lineHeight": "28px", "fontWeight": "500"}],
+                    "headline-md": ["28px", {"lineHeight": "36px", "fontWeight": "500"}],
+                    "label-md": ["14px", {"lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+        }
+        .text-glow { text-shadow: 0 0 10px rgba(242, 202, 80, 0.4); }
+    </style>
+</head>
+<body class="bg-surface-dim text-on-surface font-body-md min-h-screen relative selection:bg-primary/30">
+<!-- Ambient Shadow to Light Background Scrim -->
+<div class="fixed inset-0 pointer-events-none z-0 bg-[radial-gradient(ellipse_at_top_center,_var(--tw-gradient-stops))] from-surface-container-high/40 via-surface-dim to-black"></div>
+<!-- TopAppBar -->
+<nav class="fixed top-0 w-full z-50 flex justify-between items-center px-container-mobile h-16 bg-surface/80 backdrop-blur-xl dark:bg-surface/80 border-b border-outline-variant/30">
+<button class="text-on-surface-variant hover:bg-surface-variant/50 transition-colors p-2 rounded-full flex items-center justify-center active:scale-95 duration-150">
+<span class="material-symbols-outlined text-on-surface-variant">shield_lock</span>
+</button>
+<h1 class="font-display-lg text-headline-md text-primary tracking-tight">Khalawat</h1>
+<button class="text-on-surface-variant hover:bg-surface-variant/50 transition-colors p-2 rounded-full flex items-center justify-center active:scale-95 duration-150">
+<span class="material-symbols-outlined text-on-surface-variant">wb_sunny</span>
+</button>
+</nav>
+<!-- Main Content Canvas -->
+<main class="relative z-10 pt-28 pb-32 px-container-mobile max-w-[680px] mx-auto flex flex-col gap-section-gap">
+<!-- Spiritual Greeting -->
+<section class="text-center pt-4">
+<h2 class="font-display-lg text-display-lg text-on-surface mb-2 tracking-tight">Assalamu Alaikum</h2>
+<p class="font-body-md text-body-lg text-on-surface-variant">May peace and clarity be upon your path today.</p>
+</section>
+<!-- The Intervention Shield / Protection Toggle (The "Nuur" Button concept) -->
+<section class="flex flex-col items-center justify-center py-8">
+<div class="relative group cursor-pointer w-56 h-56 flex items-center justify-center">
+<!-- Outer Luminous Aura -->
+<div class="absolute inset-0 bg-primary/10 rounded-full blur-2xl transition-all duration-700 group-hover:bg-primary/20 group-hover:blur-3xl animate-pulse"></div>
+<!-- Inner Glowing Core (Active State) -->
+<button class="relative z-10 w-44 h-44 bg-surface-container-highest border-2 border-primary/40 rounded-full shadow-[inset_0_0_30px_rgba(242,202,80,0.15),0_0_15px_rgba(242,202,80,0.3)] flex flex-col items-center justify-center transition-transform active:scale-95 duration-150 group-hover:border-primary/60">
+<span class="material-symbols-outlined text-5xl text-primary mb-2 text-glow" style="font-variation-settings: 'FILL' 1;">security</span>
+<span class="font-label-md text-label-md text-primary tracking-widest uppercase">Protected</span>
+</button>
+</div>
+<p class="mt-8 text-on-surface-variant font-body-md text-center max-w-sm">Your spiritual sanctuary is active. Distractions are currently filtered from your device.</p>
+</section>
+<!-- Daily Verse Card (Glassmorphism & Tonal Layering) -->
+<section class="relative rounded-2xl overflow-hidden border border-outline-variant/20 shadow-2xl group">
+<div class="absolute inset-0 bg-surface-container-high/80 backdrop-blur-md z-0"></div>
+<img alt="placeholder" class="absolute right-0 top-0 w-1/2 h-full object-cover opacity-20 mix-blend-overlay group-hover:opacity-30 transition-opacity duration-700 z-0" src="https://lh3.googleusercontent.com/aida/ADBb0ujfWNPpFNumwU5pDEqtwHe6Khs4lXf65iepFmo4jzfKXOvDZmcGfFv5vq6rfqyTj6BrylMRK_Qov7kUQ7_9sLQN8MZh0mIqWmFC8GmCGq3WoZre6x7cuHjhIfVRG94V1iATXpcjF-_Df1X2EMHlJtgfvnKRBwhjV8bUFDTk0lNu64WjSdPGqVN0xmf_VBKovSbGNh9B-ajdAC1je3CtAwkNrdTVIUtEJfY0ycH7xXIpy7xtn77243RgX_Wuqt3ZthR79rHARWLgZw"/>
+<div class="relative z-10 p-8">
+<div class="flex items-center gap-3 mb-6">
+<span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-label-md text-label-md text-primary tracking-widest uppercase">Daily Light</span>
+</div>
+<blockquote class="font-quote-arabic text-quote-arabic text-on-surface mb-6 leading-loose text-right" dir="rtl">
+                    "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا"
+                </blockquote>
+<p class="font-display-lg text-headline-sm text-on-surface-variant italic mb-4">
+                    "And whoever fears Allah - He will make for him a way out."
+                </p>
+<div class="flex justify-between items-center mt-6 pt-4 border-t border-outline-variant/20">
+<span class="text-on-surface-variant/60 font-label-md text-label-md uppercase tracking-wider">At-Talaq 65:2</span>
+<button class="text-primary hover:text-primary-fixed transition-colors">
+<span class="material-symbols-outlined text-xl">share</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Focus Card: Today's Discipline -->
+<section class="bg-surface-container rounded-2xl p-6 border border-outline-variant/10 relative overflow-hidden shadow-lg">
+<!-- Subtle Gold Inner Glow / Lift -->
+<div class="absolute inset-0 border border-primary/5 rounded-2xl pointer-events-none"></div>
+<div class="flex items-center justify-between mb-6 relative z-10">
+<h3 class="font-display-lg text-headline-sm text-on-surface">Today's Discipline</h3>
+<span class="material-symbols-outlined text-on-surface-variant">track_changes</span>
+</div>
+<div class="flex items-center gap-6 relative z-10">
+<!-- Progress Halo -->
+<div class="relative w-16 h-16 flex items-center justify-center shrink-0">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 36 36">
+<!-- Background Circle -->
+<path class="text-surface-variant" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-width="2"></path>
+<!-- Progress Circle (Gold) -->
+<path class="text-primary" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none" stroke="currentColor" stroke-dasharray="60, 100" stroke-linecap="round" stroke-width="2.5"></path>
+</svg>
+<span class="absolute font-label-md text-label-md text-on-surface">3<span class="text-on-surface-variant/60">/5</span></span>
+</div>
+<div class="flex-1">
+<div class="flex flex-col gap-1 mb-3">
+<span class="font-body-md text-body-md text-on-surface">Daily Adhkar</span>
+<span class="font-body-md text-sm text-on-surface-variant">Evening remembrance pending</span>
+</div>
+<!-- Streak Indicators -->
+<div class="flex gap-1.5 mt-2">
+<div class="h-1 flex-1 bg-primary rounded-full shadow-[0_0_8px_rgba(242,202,80,0.4)]"></div>
+<div class="h-1 flex-1 bg-primary rounded-full shadow-[0_0_8px_rgba(242,202,80,0.4)]"></div>
+<div class="h-1 flex-1 bg-primary rounded-full shadow-[0_0_8px_rgba(242,202,80,0.4)]"></div>
+<div class="h-1 flex-1 bg-surface-variant rounded-full"></div>
+<div class="h-1 flex-1 bg-surface-variant rounded-full"></div>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-3 bg-surface/90 backdrop-blur-2xl dark:bg-surface/90 bg-gradient-to-t from-surface-container-highest to-transparent shadow-[0_-4px_20px_rgba(0,0,0,0.5)] rounded-t-xl md:hidden">
+<!-- Active Tab: Peace -->
+<button class="flex flex-col items-center justify-center text-primary bg-primary-container/10 rounded-full px-4 py-1 transition-all transform scale-110 duration-300 ease-out group">
+<span class="material-symbols-outlined mb-1 group-hover:opacity-100" style="font-variation-settings: 'FILL' 1;">temple_hindu</span>
+<span class="font-body-md text-label-md">Peace</span>
+</button>
+<!-- Inactive Tab: Library -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:opacity-100 transition-all group">
+<span class="material-symbols-outlined mb-1 group-hover:text-primary transition-colors">auto_stories</span>
+<span class="font-body-md text-label-md group-hover:text-primary transition-colors">Library</span>
+</button>
+<!-- Inactive Tab: Self -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant opacity-60 hover:opacity-100 transition-all group">
+<span class="material-symbols-outlined mb-1 group-hover:text-primary transition-colors">settings_account_box</span>
+<span class="font-body-md text-label-md group-hover:text-primary transition-colors">Self</span>
+</button>
+</nav>
+</body></html>

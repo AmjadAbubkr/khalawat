@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Dashboard - Khalawat</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&amp;family=Newsreader:wght@400;500;600&amp;family=Noto+Serif:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-primary": "#735c00",
+                    "primary": "#f2ca50",
+                    "on-surface": "#e5e2e1",
+                    "background": "#131313",
+                    "on-surface-variant": "#d0c5af",
+                    "surface-variant": "#353534",
+                    "error": "#ffb4ab",
+                    "on-secondary-fixed": "#0b2013",
+                    "inverse-on-surface": "#313030",
+                    "surface-container-low": "#1c1b1b",
+                    "secondary": "#b4cdb8",
+                    "on-error": "#690005",
+                    "surface-container-highest": "#353534",
+                    "outline": "#99907c",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "on-primary": "#3c2f00",
+                    "secondary-fixed": "#d0e9d4",
+                    "surface-container-high": "#2a2a2a",
+                    "primary-fixed": "#ffe088",
+                    "on-primary-fixed-variant": "#574500",
+                    "surface-container-lowest": "#0e0e0e",
+                    "on-tertiary-container": "#3d455a",
+                    "on-primary-fixed": "#241a00",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "primary-container": "#d4af37",
+                    "surface": "#131313",
+                    "error-container": "#93000a",
+                    "primary-fixed-dim": "#e9c349",
+                    "on-tertiary-fixed": "#131b2e",
+                    "on-secondary-fixed-variant": "#364c3c",
+                    "tertiary": "#c6cee8",
+                    "tertiary-fixed": "#dae2fd",
+                    "on-tertiary": "#283044",
+                    "surface-bright": "#393939",
+                    "secondary-container": "#364c3c",
+                    "tertiary-container": "#abb2cc",
+                    "surface-tint": "#e9c349",
+                    "on-background": "#e5e2e1",
+                    "surface-container": "#201f1f",
+                    "inverse-surface": "#e5e2e1",
+                    "on-secondary": "#203527",
+                    "on-secondary-container": "#a3bba7",
+                    "on-primary-container": "#554300",
+                    "secondary-fixed-dim": "#b4cdb8",
+                    "on-error-container": "#ffdad6",
+                    "surface-dim": "#131313",
+                    "outline-variant": "#4d4635"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "32px",
+                    "container-padding-mobile": "20px",
+                    "container-padding-desktop": "40px",
+                    "base": "8px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "label-md": [
+                            "Manrope"
+                    ],
+                    "body-lg": [
+                            "Manrope"
+                    ],
+                    "quote-arabic": [
+                            "Noto Serif"
+                    ],
+                    "headline-sm": [
+                            "Newsreader"
+                    ],
+                    "headline-md": [
+                            "Newsreader"
+                    ],
+                    "display-lg": [
+                            "Newsreader"
+                    ],
+                    "body-md": [
+                            "Manrope"
+                    ]
+            },
+            "fontSize": {
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "quote-arabic": [
+                            "24px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-sm": [
+                            "22px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-md": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "display-lg": [
+                            "40px",
+                            {
+                                    "lineHeight": "48px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+    },
+        },
+      }
+    </script>
+<style>
+        /* Tonal Luminosity & Layered Opacity */
+        .glass-panel {
+            background: rgba(32, 31, 31, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(153, 144, 124, 0.1);
+        }
+        
+        .gold-glow {
+            box-shadow: inset 0 0 0 0.5px rgba(242, 202, 80, 0.4), 0 4px 24px -4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .halo-progress {
+            stroke-dasharray: 100;
+            stroke-dashoffset: 25; /* 75% complete */
+            stroke-linecap: round;
+        }
+
+        /* Scrim Gradient for Depth */
+        .bg-scrim {
+            background: radial-gradient(circle at 50% 0%, rgba(54, 76, 60, 0.15) 0%, rgba(19, 19, 19, 1) 70%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md min-h-screen flex flex-col items-center bg-scrim">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex items-center justify-between px-container-padding-mobile h-16 bg-background/80 backdrop-blur-xl bg-transparent flat no shadows">
+<button aria-label="Menu" class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">menu</span>
+</button>
+<h1 class="font-display-lg text-display-lg text-primary tracking-tight">Khalawat</h1>
+<button aria-label="Settings" class="text-on-surface-variant hover:text-primary-fixed-dim transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+</button>
+</header>
+<!-- Main Canvas -->
+<main class="flex-grow w-full max-w-[680px] px-container-padding-mobile pt-24 pb-32 flex flex-col items-center justify-center space-y-section-gap">
+<!-- Large Circular Status Indicator -->
+<div class="relative flex items-center justify-center w-[180px] h-[180px] mt-8">
+<!-- Progress Halo (Decorative) -->
+<svg class="absolute inset-0 w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<circle class="text-surface-container-highest" cx="50" cy="50" fill="none" r="48" stroke="currentColor" stroke-width="1"></circle>
+<circle class="text-secondary halo-progress" cx="50" cy="50" fill="none" r="48" stroke="currentColor" stroke-width="1.5"></circle>
+</svg>
+<!-- Core Status (Protected State) -->
+<div class="flex flex-col items-center justify-center glass-panel rounded-full w-[150px] h-[150px] gold-glow relative z-10">
+<span class="material-symbols-outlined text-secondary text-5xl mb-2" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+<span class="font-label-md text-label-md text-secondary">Protected</span>
+</div>
+<!-- Ambient Glow Behind Shield -->
+<div class="absolute inset-0 bg-secondary/10 rounded-full blur-2xl -z-10"></div>
+</div>
+<!-- Spiritual Reminder / Context -->
+<div class="w-full text-center px-gutter py-base">
+<p class="font-headline-sm text-headline-sm text-on-surface-variant italic">
+                "Patience is a pillar of faith."
+            </p>
+</div>
+<!-- Stats Bento Grid -->
+<div class="w-full grid grid-cols-2 gap-4">
+<!-- Interventions Card -->
+<div class="glass-panel rounded-xl p-6 flex flex-col justify-between h-[120px] gold-glow relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-background to-primary/30"></div>
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant">Interventions</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" style="font-variation-settings: 'FILL' 0;">front_hand</span>
+</div>
+<div class="font-display-lg text-display-lg text-primary">
+                    3
+                </div>
+</div>
+<!-- Current Level Card -->
+<div class="glass-panel rounded-xl p-6 flex flex-col justify-between h-[120px] relative overflow-hidden">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-background to-secondary/30"></div>
+<div class="flex justify-between items-start">
+<span class="font-label-md text-label-md text-on-surface-variant">Current Level</span>
+<span class="material-symbols-outlined text-on-surface-variant text-sm" style="font-variation-settings: 'FILL' 0;">psychology</span>
+</div>
+<div class="font-headline-md text-headline-md text-secondary mt-1">
+                    Cooling
+                </div>
+</div>
+</div>
+<!-- Spacer to push button down if needed, but flex-col handles it nicely with gap -->
+<div class="flex-grow"></div>
+<!-- Toggle Button Action -->
+<div class="w-full pt-8 pb-4">
+<button class="w-full py-4 rounded-lg bg-surface-container-high border border-error/30 text-error font-label-md text-label-md flex items-center justify-center space-x-2 hover:bg-error/10 transition-colors">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0;">gpp_bad</span>
+<span>Disable Khalawat</span>
+</button>
+<p class="text-center font-body-md text-body-md text-on-surface-variant/50 mt-4 text-xs">
+                Requires reflection to disable.
+            </p>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-4 pb-6 pt-2 bg-surface-container-lowest/90 backdrop-blur-2xl border-t border-outline-variant/30 shadow-lg docked full-width bottom-0 rounded-t-xl md:hidden">
+<button class="flex flex-col items-center justify-center text-on-secondary-fixed-variant opacity-60 hover:bg-surface-variant/50 w-16 rounded-xl py-1 transition-colors group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform mb-1" style="font-variation-settings: 'FILL' 0;">self_improvement</span>
+<span class="font-label-md text-[10px] leading-tight">Reflect</span>
+</button>
+<button class="flex flex-col items-center justify-center text-primary bg-secondary-container/20 rounded-full px-4 py-1 hover:bg-surface-variant/50 transition-colors group scale-110 duration-300 ease-out">
+<span class="material-symbols-outlined mb-1" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+<span class="font-label-md text-[10px] leading-tight">Shield</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-secondary-fixed-variant opacity-60 hover:bg-surface-variant/50 w-16 rounded-xl py-1 transition-colors group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform mb-1" style="font-variation-settings: 'FILL' 0;">brightness_5</span>
+<span class="font-label-md text-[10px] leading-tight">Nuur</span>
+</button>
+<button class="flex flex-col items-center justify-center text-on-secondary-fixed-variant opacity-60 hover:bg-surface-variant/50 w-16 rounded-xl py-1 transition-colors group">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform mb-1" style="font-variation-settings: 'FILL' 0;">auto_graph</span>
+<span class="font-label-md text-[10px] leading-tight">Growth</span>
+</button>
+</nav>
+<!-- Web Desktop Navigation Cluster (Hidden on Mobile) -->
+<nav class="hidden md:flex fixed top-0 right-16 h-16 items-center space-x-8 z-50">
+<button class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md flex items-center space-x-2">
+<span class="material-symbols-outlined text-sm">self_improvement</span>
+<span>Reflect</span>
+</button>
+<button class="text-primary hover:text-primary transition-colors font-label-md text-label-md flex items-center space-x-2 border-b-2 border-primary pb-1 mt-1">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">shield_lock</span>
+<span>Shield</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md flex items-center space-x-2">
+<span class="material-symbols-outlined text-sm">brightness_5</span>
+<span>Nuur</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors font-label-md text-label-md flex items-center space-x-2">
+<span class="material-symbols-outlined text-sm">auto_graph</span>
+<span>Growth</span>
+</button>
+</nav>
+</body></html>
