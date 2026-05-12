@@ -163,4 +163,18 @@ class AntiTamperStateTest {
         state.resetDisconnectCount()
         assertThat(state.disconnectCount).isEqualTo(0)
     }
+
+    @Test
+    fun `restore disconnect count from persisted value`() {
+        state.restoreDisconnectCount(4)
+        assertThat(state.disconnectCount).isEqualTo(4)
+    }
+
+    @Test
+    fun `restore disconnect count then increment`() {
+        state.restoreDisconnectCount(2)
+        state.recordDisconnect()
+        assertThat(state.disconnectCount).isEqualTo(3)
+        assertThat(state.shouldShowDisconnectReminder).isTrue()
+    }
 }

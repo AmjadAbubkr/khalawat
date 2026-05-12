@@ -54,10 +54,14 @@ class MainActivity : ComponentActivity() {
                 KhalawatVpnService.ACTION_VPN_STARTED -> {
                     isVpnActiveState = true
                     prefs.isVpnActive = true
+                    prefs.userStoppedVpn = false
                 }
                 KhalawatVpnService.ACTION_VPN_STOPPED -> {
                     isVpnActiveState = false
                     prefs.isVpnActive = false
+                    if (!prefs.userStoppedVpn && prefs.isOnboardingComplete) {
+                        startVpn()
+                    }
                 }
             }
         }
@@ -70,6 +74,7 @@ class MainActivity : ComponentActivity() {
         isVpnActiveState = prefs.isVpnActive
 
         prefs.companionPin?.let { antiTamperState.setCompanionPinRequired(it) }
+        antiTamperState.restoreDisconnectCount(prefs.disconnectCount)
 
         val filter = IntentFilter().apply {
             addAction(KhalawatVpnService.ACTION_VPN_STARTED)
@@ -81,7 +86,7 @@ class MainActivity : ComponentActivity() {
             registerReceiver(vpnStateReceiver, filter)
         }
 
-        if (prefs.isOnboardingComplete && !isVpnActiveState) {
+        if (prefs.isOnboardingComplete && !isVpnActiveState && !prefs.userStoppedVpn) {
             val intent = VpnService.prepare(this)
             if (intent == null) {
                 startVpn()
@@ -109,8 +114,26 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        if (prefs.isOnboardingComplete && !prefs.userStoppedVpn) {
+            val vpnActive = KhalawatVpnService.isRunning
+            if (isVpnActiveState != vpnActive) {
+                isVpnActiveState = vpnActive
+                prefs.isVpnActive = vpnActive
+            }
+            if (!vpnActive) {
+                val intent = VpnService.prepare(this)
+                if (intent == null) {
+                    startVpn()
+                }
+            }
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
+        prefs.disconnectCount = antiTamperState.disconnectCount
         try { unregisterReceiver(vpnStateReceiver) } catch (_: Exception) {}
     }
 
@@ -142,6 +165,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startVpn() {
+        prefs.userStoppedVpn = false
         val intent = Intent(this, KhalawatVpnService::class.java).apply {
             action = KhalawatVpnService.ACTION_START
         }
@@ -149,6 +173,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun stopVpn() {
+        prefs.userStoppedVpn = true
+        antiTamperState.recordDisconnect()
+        prefs.disconnectCount = antiTamperState.disconnectCount
         val intent = Intent(this, KhalawatVpnService::class.java).apply {
             action = KhalawatVpnService.ACTION_STOP
         }
@@ -226,14 +253,20 @@ fun KhalawatApp(
                 )
             }
             AppScreen.Dashboard -> {
-                DashboardScreen(
-                    isVpnActive = isVpnActive,
-                    currentStage = currentStage,
-                    overrideCountToday = overrideCount,
-                    onToggleVpn = onStartVpn,
-                    onShowDisable = { showDisableScreen = true }
-                )
-            }
+                    DashboardScreen(
+                        isVpnActive = isVpnActive,
+                        currentStage = currentStage,
+                        overrideCountToday = overrideCount,
+                        onToggleVpn = {
+                            if (isVpnActive) {
+                                showDisableScreen = true
+                            } else {
+                                onStartVpn()
+                            }
+                        },
+                        onShowDisable = { showDisableScreen = true }
+                    )
+                }
         }
     }
 }

@@ -100,6 +100,10 @@ class AntiTamperState(
     fun resetDisconnectCount() {
         disconnectCount = 0
     }
+
+    fun restoreDisconnectCount(count: Int) {
+        disconnectCount = count
+    }
 }
 
 data class SpiritualReminder(

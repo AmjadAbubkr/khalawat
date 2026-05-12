@@ -36,5 +36,9 @@ class KhalawatPreferences(context: Context) {
         get() = prefs.getInt("disconnect_count", 0)
         set(value) = prefs.edit().putInt("disconnect_count", value).apply()
 
+    var userStoppedVpn: Boolean
+        get() = prefs.getBoolean("user_stopped_vpn", false)
+        set(value) = prefs.edit().putBoolean("user_stopped_vpn", value).apply()
+
     fun clear() = prefs.edit().clear().apply()
 }

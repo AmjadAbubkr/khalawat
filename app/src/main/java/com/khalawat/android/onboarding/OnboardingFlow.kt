@@ -363,80 +363,131 @@ private fun CompanionPinScreen(state: OnboardingState) {
     var pinInput by rememberSaveable { mutableStateOf(state.companionPin ?: "") }
     var parentMsg by rememberSaveable { mutableStateOf(state.parentMessage) }
 
-    Text(
-        text = "Companion PIN",
-        style = MaterialTheme.typography.headlineLarge.copy(
-            color = MaterialTheme.colorScheme.primary,
-            textAlign = TextAlign.Center,
-        ),
-    )
-    Spacer(modifier = Modifier.height(16.dp))
-    Text(
-        text = "Optionally set a PIN that a parent or accountability partner controls. They'll need it to disable Khalawat.",
-        style = MaterialTheme.typography.bodyMedium.copy(
-            textAlign = TextAlign.Center,
-            lineHeight = 22.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        ),
-    )
-    Spacer(modifier = Modifier.height(24.dp))
-
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center) {
-        Text("Enable Companion PIN", style = MaterialTheme.typography.bodyMedium)
-        Spacer(modifier = Modifier.width(8.dp))
-        Switch(
-            checked = state.companionPinEnabled,
-            onCheckedChange = { enabled ->
-                state.enableCompanionPin(enabled)
-                if (!enabled) {
-                    pinInput = ""
-                    parentMsg = ""
-                }
-            },
-        )
-    }
-
-    if (state.companionPinEnabled) {
-        Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = pinInput,
-            onValueChange = { new: String ->
-                if (new.length <= 4 && new.all { it.isDigit() }) {
-                    pinInput = new
-                    if (new.length == 4) state.setCompanionPin(new)
-                }
-            },
-            label = { Text("4-digit PIN") },
-            modifier = Modifier.fillMaxWidth(0.6f),
-            singleLine = true,
-            visualTransformation = PasswordVisualTransformation(),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(
+            text = "Companion PIN",
+            style = MaterialTheme.typography.headlineLarge.copy(
+                color = MaterialTheme.colorScheme.primary,
+                textAlign = TextAlign.Center,
             ),
         )
         Spacer(modifier = Modifier.height(16.dp))
-        OutlinedTextField(
-            value = parentMsg,
-            onValueChange = { new: String ->
-                parentMsg = new
-                state.updateParentMessage(new)
-            },
-            label = { Text("Custom message from parent") },
-            modifier = Modifier.fillMaxWidth(0.8f),
-            minLines = 2,
-            maxLines = 3,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-            shape = RoundedCornerShape(12.dp),
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+        Text(
+            text = "Optionally set a PIN that a parent or accountability partner controls. They'll need it to disable Khalawat.",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                textAlign = TextAlign.Center,
+                lineHeight = 22.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             ),
         )
+        Spacer(modifier = Modifier.height(24.dp))
+
+        Card(
+            modifier = Modifier.fillMaxWidth(0.9f),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+            ),
+            shape = RoundedCornerShape(16.dp),
+            border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        "Enable Companion PIN",
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        "Adds a layer of external accountability.",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
+                    )
+                }
+                Spacer(modifier = Modifier.width(12.dp))
+                Switch(
+                    checked = state.companionPinEnabled,
+                    onCheckedChange = { enabled ->
+                        state.enableCompanionPin(enabled)
+                        if (!enabled) {
+                            pinInput = ""
+                            parentMsg = ""
+                        }
+                    },
+                )
+            }
+        }
+
+        if (state.companionPinEnabled) {
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                ),
+                shape = RoundedCornerShape(16.dp),
+            ) {
+                Column(
+                    modifier = Modifier.fillMaxWidth().padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    Text(
+                        "Set 4-Digit PIN",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        ),
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    OutlinedTextField(
+                        value = pinInput,
+                        onValueChange = { new: String ->
+                            if (new.length <= 4 && new.all { it.isDigit() }) {
+                                pinInput = new
+                                if (new.length == 4) state.setCompanionPin(new)
+                            }
+                        },
+                        label = { Text("4-digit PIN") },
+                        modifier = Modifier.fillMaxWidth(0.6f),
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                        ),
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    OutlinedTextField(
+                        value = parentMsg,
+                        onValueChange = { new: String ->
+                            parentMsg = new
+                            state.updateParentMessage(new)
+                        },
+                        label = { Text("Custom message from parent") },
+                        modifier = Modifier.fillMaxWidth(),
+                        minLines = 2,
+                        maxLines = 3,
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = MaterialTheme.colorScheme.primary,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
+                        ),
+                    )
+                }
+            }
+        }
     }
 }
 

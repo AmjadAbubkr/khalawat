@@ -46,6 +46,10 @@ class KhalawatVpnService : VpnService() {
         const val NOTIFICATION_CHANNEL_ID = "khalawat_vpn"
         const val NOTIFICATION_ID = 1
         private const val TAG = "KhalawatVpn"
+
+        @Volatile
+        var isRunning: Boolean = false
+            private set
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
@@ -93,6 +97,7 @@ class KhalawatVpnService : VpnService() {
         startInterventionServer()
         startPacketLoop()
         startForegroundNotification()
+        isRunning = true
         broadcastVpnState(ACTION_VPN_STARTED)
         return START_STICKY
     }
@@ -294,6 +299,7 @@ class KhalawatVpnService : VpnService() {
 
     private fun stopVpn() {
         running = false
+        isRunning = false
         vpnThread?.interrupt()
         vpnThread = null
         interventionServer?.stop()
