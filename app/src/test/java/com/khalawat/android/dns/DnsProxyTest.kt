@@ -39,11 +39,11 @@ class DnsProxyTest {
     }
 
     @Test
-    fun `blocked domain redirects to local intervention server`() {
+    fun `blocked domain redirects to blocked sink address`() {
         val query = buildDnsQuery("bad.com")
         val result = dnsProxy.resolve(query) as DnsResponse.Blocked
 
-        assertThat(result.redirectIp).isEqualTo(InetAddress.getByName("127.0.0.1"))
+        assertThat(result.redirectIp).isEqualTo(InetAddress.getByName("0.0.0.0"))
     }
 
     @Test
