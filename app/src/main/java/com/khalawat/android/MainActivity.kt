@@ -7,8 +7,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -53,7 +54,8 @@ class MainActivity : ComponentActivity() {
                 isVpnActiveState = false
                 prefs.isVpnActive = false
                 if (!prefs.userStoppedVpn && prefs.isOnboardingComplete) {
-                    startVpn()
+                    val intent = VpnService.prepare(this@MainActivity)
+                    if (intent == null) startVpn()
                 }
             }
         }
@@ -61,7 +63,10 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            statusBarStyle = androidx.activity.SystemBarStyle.dark(Color(0xFF131313).toArgb()),
+            navigationBarStyle = androidx.activity.SystemBarStyle.dark(Color(0xFF131313).toArgb()),
+        )
         prefs = KhalawatPreferences(this)
         isVpnActiveState = prefs.isVpnActive
 

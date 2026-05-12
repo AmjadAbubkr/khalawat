@@ -49,23 +49,9 @@ class KhalawatVpnService : VpnService() {
 
         @Volatile
         var isRunning: Boolean = false
-            private set
+        private set
 
         var onVpnStateChanged: ((String) -> Unit)? = null
-
-        private val LOOPBACK_EXCLUDE_ROUTES = listOf(
-            "0.0.0.0" to 5,
-            "8.0.0.0" to 7,
-            "16.0.0.0" to 4,
-            "32.0.0.0" to 3,
-            "64.0.0.0" to 3,
-            "96.0.0.0" to 4,
-            "112.0.0.0" to 5,
-            "120.0.0.0" to 6,
-            "124.0.0.0" to 7,
-            "126.0.0.0" to 8,
-            "128.0.0.0" to 1,
-        )
     }
 
     private var vpnInterface: ParcelFileDescriptor? = null
@@ -135,10 +121,7 @@ class KhalawatVpnService : VpnService() {
             .addDnsServer("8.8.8.8")
             .setMtu(VPN_MTU)
             .addDisallowedApplication(packageName)
-
-        for (route in LOOPBACK_EXCLUDE_ROUTES) {
-            builder.addRoute(route.first, route.second)
-        }
+            .addRoute(VPN_ROUTE, 0)
 
         vpnInterface = builder.establish()
     }
@@ -158,7 +141,7 @@ class KhalawatVpnService : VpnService() {
     }
 
     private fun packetLoop() {
-        val vpn = vpnInterface ?: return
+        val vpn = vpnInterface ?: run { stopVpn(); return }
         val inputStream = FileInputStream(vpn.fileDescriptor)
         val outputStream = FileOutputStream(vpn.fileDescriptor)
         val buffer = ByteArray(VPN_MTU)
@@ -190,6 +173,8 @@ class KhalawatVpnService : VpnService() {
             }
         } catch (e: Exception) {
             if (running) Log.e(TAG, "Packet loop error", e)
+        } finally {
+            if (running) stopVpn()
         }
     }
 
