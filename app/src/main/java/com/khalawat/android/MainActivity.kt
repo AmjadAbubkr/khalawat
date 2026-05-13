@@ -9,6 +9,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.lifecycleScope
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -38,6 +39,9 @@ import com.khalawat.android.vpn.KhalawatRuntimeState
 import com.khalawat.android.vpn.KhalawatVpnService
 import com.khalawat.android.persistence.AppDatabase
 import com.khalawat.android.persistence.RoomSessionRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : ComponentActivity() {
 
@@ -95,8 +99,8 @@ class MainActivity : ComponentActivity() {
 
         prefs.companionPin?.let { antiTamperState.setCompanionPinRequired(it) }
         antiTamperState.restoreDisconnectCount(prefs.disconnectCount)
-        syncDashboardSnapshot()
         restorePendingIntervention()
+        refreshDashboardSnapshot()
 
         KhalawatVpnService.onVpnStateChanged = vpnStateCallback
 
@@ -139,7 +143,7 @@ class MainActivity : ComponentActivity() {
                 isVpnActiveState = vpnActive
                 prefs.isVpnActive = vpnActive
             }
-            syncDashboardSnapshot()
+            refreshDashboardSnapshot()
             restorePendingIntervention()
             if (!vpnActive && !prefs.userStoppedVpn) {
                 val intent = VpnService.prepare(this)
@@ -223,18 +227,21 @@ class MainActivity : ComponentActivity() {
         startService(intent)
     }
 
-    private fun syncDashboardSnapshot() {
-        val startOfDay = java.time.LocalDate.now()
-            .atStartOfDay(java.time.ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
-        val persisted = sessionRepo.loadState()
-        KhalawatRuntimeState.updateDashboard(
-            DashboardSnapshot(
-                currentStage = persisted?.stage ?: EscalationStage.STAGE_1,
-                interventionCountToday = sessionRepo.getInterventionCountSince(startOfDay)
-            )
-        )
+    private fun refreshDashboardSnapshot() {
+        lifecycleScope.launch {
+            val snapshot = withContext(Dispatchers.IO) {
+                val startOfDay = java.time.LocalDate.now()
+                    .atStartOfDay(java.time.ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli()
+                val persisted = sessionRepo.loadState()
+                DashboardSnapshot(
+                    currentStage = persisted?.stage ?: EscalationStage.STAGE_1,
+                    interventionCountToday = sessionRepo.getInterventionCountSince(startOfDay)
+                )
+            }
+            KhalawatRuntimeState.updateDashboard(snapshot)
+        }
     }
 
     private fun restorePendingIntervention() {

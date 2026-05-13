@@ -26,6 +26,12 @@ import java.io.FileOutputStream
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetAddress
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Android VPN service that intercepts DNS traffic via a TUN interface.
@@ -69,6 +75,7 @@ class KhalawatVpnService : VpnService() {
     private lateinit var prefs: KhalawatPreferences
     private lateinit var escalationEngine: EscalationEngine
     private lateinit var spiritualContent: com.khalawat.android.content.SpiritualContentImpl
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
 
     @Volatile
     private var running = false
@@ -90,9 +97,12 @@ class KhalawatVpnService : VpnService() {
         sessionRepo = RoomSessionRepository(
             AppDatabase.getInstance(this).escalationStateDao()
         )
-        restoreEscalationState(sessionRepo.loadState())
         coordinator = DnsResolverCoordinator(dnsProxy, escalationEngine, sessionRepo)
-        syncDashboardState()
+        serviceScope.launch {
+            val restoredState = withContext(Dispatchers.IO) { sessionRepo.loadState() }
+            restoreEscalationState(restoredState)
+            syncDashboardState()
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -128,6 +138,7 @@ class KhalawatVpnService : VpnService() {
     }
 
     override fun onDestroy() {
+        serviceScope.cancel()
         stopVpn()
         super.onDestroy()
     }
@@ -345,16 +356,19 @@ class KhalawatVpnService : VpnService() {
     }
 
     private fun syncDashboardState() {
-        val startOfDay = java.time.LocalDate.now()
-            .atStartOfDay(java.time.ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
-        KhalawatRuntimeState.updateDashboard(
-            DashboardSnapshot(
-                currentStage = escalationEngine.getCurrentStage(),
-                interventionCountToday = sessionRepo.getInterventionCountSince(startOfDay)
-            )
-        )
+        serviceScope.launch {
+            val snapshot = withContext(Dispatchers.IO) {
+                val startOfDay = java.time.LocalDate.now()
+                    .atStartOfDay(java.time.ZoneId.systemDefault())
+                    .toInstant()
+                    .toEpochMilli()
+                DashboardSnapshot(
+                    currentStage = escalationEngine.getCurrentStage(),
+                    interventionCountToday = sessionRepo.getInterventionCountSince(startOfDay)
+                )
+            }
+            KhalawatRuntimeState.updateDashboard(snapshot)
+        }
     }
 
     private fun emitIntervention(domain: String, stage: com.khalawat.android.escalation.EscalationStage) {
