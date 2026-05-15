@@ -21,6 +21,10 @@ import androidx.compose.runtime.setValue
 class AntiTamperState(
     val holdDurationSeconds: Int = 30
 ) {
+    companion object {
+        const val MAX_DISCONNECT_COUNT = 999
+    }
+
     private var holdStartTime: Long? = null
     private var reminderIndex: Int = 0
     private var _companionPin: String? = null
@@ -99,6 +103,10 @@ class AntiTamperState(
 
     fun resetDisconnectCount() {
         disconnectCount = 0
+    }
+
+    fun restoreDisconnectCount(count: Int) {
+        disconnectCount = count.coerceIn(0, MAX_DISCONNECT_COUNT)
     }
 }
 

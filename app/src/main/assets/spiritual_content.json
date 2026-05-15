@@ -1,0 +1,92 @@
+{
+  "ayat": [
+    {
+      "arabic": "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا",
+      "translations": {
+        "en": "Whoever fears Allah, He will make for him a way out.",
+        "ar": "وَمَن يَتَّقِ اللَّهَ يَجْعَل لَّهُ مَخْرَجًا",
+        "ur": "اور جو اللہ سے ڈرے، اللہ اس کے لیے نکلنے کی راہ بنا دیتا ہے۔",
+        "ms": "Sesiapa bertakwa kepada Allah, nescaya Dia akan mengadakan baginya jalan keluar.",
+        "tr": "Kim Allah'tan sakınırsa, Allah ona bir çıkış yolu verir.",
+        "fr": "Quiconque craint Allah, Il lui donnera une issue favorable."
+      },
+      "source": "Quran 65:2"
+    },
+    {
+      "arabic": "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+      "translations": {
+        "en": "Indeed, with hardship comes ease.",
+        "ar": "إِنَّ مَعَ الْعُسْرِ يُسْرًا",
+        "ur": "بے شک مشکل کے ساتھ آسانی ہے۔",
+        "ms": "Sesungguhnya bersama kesulitan ada kemudahan.",
+        "tr": "Şüphesiz zorlukla beraber bir kolaylık vardır.",
+        "fr": "À côté de la difficulté est, certes, une facilité."
+      },
+      "source": "Quran 94:6"
+    },
+    {
+      "arabic": "قُلْ يَا عِبَادِيَ الَّذِينَ أَسْرَفُوا عَلَى أَنفُسِهِمْ لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ",
+      "translations": {
+        "en": "Do not despair of the mercy of Allah.",
+        "ar": "قُلْ يَا عِبَادِيَ الَّذِينَ أَسْرَفُوا عَلَى أَنفُسِهِمْ لَا تَقْنَطُوا مِن رَّحْمَةِ اللَّهِ",
+        "ur": "اللہ کی رحمت سے نا امید نہ ہو۔",
+        "ms": "Janganlah kamu berputus asa dari rahmat Allah.",
+        "tr": "Allah'ın rahmetinden ümidinizi kesmeyin.",
+        "fr": "Ne désespérez pas de la miséricorde d'Allah."
+      },
+      "source": "Quran 39:53"
+    }
+  ],
+  "hadith": [
+    {
+      "arabic": "كُلُّ ابْنِ آدَمَ خَطَّاءٌ وَخَيْرُ الْخَطَّائِينَ التَّوَّابُونَ",
+      "translations": {
+        "en": "Every son of Adam sins, and the best of sinners are those who repent.",
+        "ar": "كُلُّ ابْنِ آدَمَ خَطَّاءٌ وَخَيْرُ الْخَطَّائِينَ التَّوَّابُونَ",
+        "ur": "ہر ابن آدم خطاکار ہے، اور بہترین خطاکار وہ ہیں جو توبہ کرتے ہیں۔",
+        "ms": "Setiap anak Adam melakukan dosa, dan sebaik-baik yang berdosa ialah yang bertaubat.",
+        "tr": "Âdemoğlunun hepsi günah işler; günah işleyenlerin en hayırlısı tevbe edenlerdir.",
+        "fr": "Tous les fils d’Adam commettent des fautes, et les meilleurs sont ceux qui se repentent."
+      },
+      "source": "Tirmidhi 2499"
+    }
+  ],
+  "dhikr": [
+    {
+      "arabic": "سُبْحَانَ اللَّهِ",
+      "translations": {
+        "en": "Glory be to Allah",
+        "ar": "سُبْحَانَ اللَّهِ",
+        "ur": "اللہ پاک ہے",
+        "ms": "Maha Suci Allah",
+        "tr": "Allah'ı tenzih ederim",
+        "fr": "Gloire à Allah"
+      },
+      "source": "Dhikr"
+    },
+    {
+      "arabic": "الْحَمْدُ لِلَّهِ",
+      "translations": {
+        "en": "All praise is for Allah",
+        "ar": "الْحَمْدُ لِلَّهِ",
+        "ur": "سب تعریفیں اللہ کے لیے ہیں",
+        "ms": "Segala puji bagi Allah",
+        "tr": "Hamd Allah'a mahsustur",
+        "fr": "Louange à Allah"
+      },
+      "source": "Dhikr"
+    },
+    {
+      "arabic": "اللَّهُ أَكْبَرُ",
+      "translations": {
+        "en": "Allah is the Greatest",
+        "ar": "اللَّهُ أَكْبَرُ",
+        "ur": "اللہ سب سے بڑا ہے",
+        "ms": "Allah Maha Besar",
+        "tr": "Allah en büyüktür",
+        "fr": "Allah est le Plus Grand"
+      },
+      "source": "Dhikr"
+    }
+  ]
+}

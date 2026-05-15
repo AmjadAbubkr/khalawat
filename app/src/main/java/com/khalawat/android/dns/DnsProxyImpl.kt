@@ -8,7 +8,7 @@ class DnsProxyImpl(
 ) : DnsProxy {
 
     companion object {
-        val REDIRECT_IP: InetAddress = InetAddress.getByName("127.0.0.1")
+        val REDIRECT_IP: InetAddress = InetAddress.getByName("0.0.0.0")
     }
 
     override fun resolve(query: DnsQuery): DnsResponse {

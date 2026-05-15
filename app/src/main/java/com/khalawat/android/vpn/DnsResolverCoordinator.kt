@@ -37,14 +37,29 @@ class DnsResolverCoordinator(
     private val escalationEngine: EscalationEngine,
     private val sessionRepository: SessionRepository
 ) {
+    private var lastBlockedDomain: String? = null
+    private var lastBlockedAtMillis: Long = 0L
+
     fun handleDnsPacket(query: DnsQuery): DnsResult {
         val response = dnsProxy.resolve(query)
 
         return when (response) {
             is DnsResponse.Blocked -> {
                 val domain = com.khalawat.android.dns.DnsPacketParser.extractDomain(query.data) ?: "unknown"
+                val now = System.currentTimeMillis()
+                if (shouldCoalesce(domain, now)) {
+                    return DnsResult(
+                        action = DnsResult.Action.REDIRECT,
+                        escalationStage = escalationEngine.getCurrentStage(),
+                        domain = domain,
+                        redirectIp = response.redirectIp
+                    )
+                }
                 val state = escalationEngine.onBlockedRequest(domain)
                 persistState(state)
+                sessionRepository.logIntervention(domain, state.stage, now)
+                lastBlockedDomain = domain
+                lastBlockedAtMillis = now
                 DnsResult(
                     action = DnsResult.Action.REDIRECT,
                     escalationStage = state.stage,
@@ -81,7 +96,13 @@ class DnsResolverCoordinator(
 
     fun reset() {
         escalationEngine.reset()
+        lastBlockedDomain = null
+        lastBlockedAtMillis = 0L
         sessionRepository.clearState()
+    }
+
+    private fun shouldCoalesce(domain: String, now: Long): Boolean {
+        return lastBlockedDomain == domain && now - lastBlockedAtMillis < BLOCKED_REQUEST_DEBOUNCE_MS
     }
 
     private fun persistState(state: EscalationState) {
@@ -93,5 +114,9 @@ class DnsResolverCoordinator(
                 cooldownEndTime = state.cooldownEndTime?.toEpochMilli()
             )
         )
+    }
+
+    companion object {
+        private const val BLOCKED_REQUEST_DEBOUNCE_MS = 8_000L
     }
 }

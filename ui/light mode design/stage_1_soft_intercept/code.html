@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Khalawat - Soft Intercept</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&amp;family=Newsreader:opsz,wght@6..72,400;500;600&amp;family=Noto+Serif:wght@400&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "inverse-primary": "#735c00",
+                    "primary": "#f2ca50",
+                    "on-surface": "#e5e2e1",
+                    "background": "#131313",
+                    "on-surface-variant": "#d0c5af",
+                    "surface-variant": "#353534",
+                    "error": "#ffb4ab",
+                    "on-secondary-fixed": "#0b2013",
+                    "inverse-on-surface": "#313030",
+                    "surface-container-low": "#1c1b1b",
+                    "secondary": "#b4cdb8",
+                    "on-error": "#690005",
+                    "surface-container-highest": "#353534",
+                    "outline": "#99907c",
+                    "on-tertiary-fixed-variant": "#3f465c",
+                    "on-primary": "#3c2f00",
+                    "secondary-fixed": "#d0e9d4",
+                    "surface-container-high": "#2a2a2a",
+                    "primary-fixed": "#ffe088",
+                    "on-primary-fixed-variant": "#574500",
+                    "surface-container-lowest": "#0e0e0e",
+                    "on-tertiary-container": "#3d455a",
+                    "on-primary-fixed": "#241a00",
+                    "tertiary-fixed-dim": "#bec6e0",
+                    "primary-container": "#d4af37",
+                    "surface": "#131313",
+                    "error-container": "#93000a",
+                    "primary-fixed-dim": "#e9c349",
+                    "on-tertiary-fixed": "#131b2e",
+                    "on-secondary-fixed-variant": "#364c3c",
+                    "tertiary": "#c6cee8",
+                    "tertiary-fixed": "#dae2fd",
+                    "on-tertiary": "#283044",
+                    "surface-bright": "#393939",
+                    "secondary-container": "#364c3c",
+                    "tertiary-container": "#abb2cc",
+                    "surface-tint": "#e9c349",
+                    "on-background": "#e5e2e1",
+                    "surface-container": "#201f1f",
+                    "inverse-surface": "#e5e2e1",
+                    "on-secondary": "#203527",
+                    "on-secondary-container": "#a3bba7",
+                    "on-primary-container": "#554300",
+                    "secondary-fixed-dim": "#b4cdb8",
+                    "on-error-container": "#ffdad6",
+                    "surface-dim": "#131313",
+                    "outline-variant": "#4d4635"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "section-gap": "32px",
+                    "container-padding-mobile": "20px",
+                    "container-padding-desktop": "40px",
+                    "base": "8px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "label-md": [
+                            "Manrope"
+                    ],
+                    "body-lg": [
+                            "Manrope"
+                    ],
+                    "quote-arabic": [
+                            "Noto Serif"
+                    ],
+                    "headline-sm": [
+                            "Newsreader"
+                    ],
+                    "headline-md": [
+                            "Newsreader"
+                    ],
+                    "display-lg": [
+                            "Newsreader"
+                    ],
+                    "body-md": [
+                            "Manrope"
+                    ]
+            },
+            "fontSize": {
+                    "label-md": [
+                            "14px",
+                            {
+                                    "lineHeight": "20px",
+                                    "letterSpacing": "0.05em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-lg": [
+                            "18px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "quote-arabic": [
+                            "24px",
+                            {
+                                    "lineHeight": "40px",
+                                    "fontWeight": "400"
+                            }
+                    ],
+                    "headline-sm": [
+                            "22px",
+                            {
+                                    "lineHeight": "28px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "headline-md": [
+                            "28px",
+                            {
+                                    "lineHeight": "36px",
+                                    "fontWeight": "500"
+                            }
+                    ],
+                    "display-lg": [
+                            "40px",
+                            {
+                                    "lineHeight": "48px",
+                                    "letterSpacing": "-0.02em",
+                                    "fontWeight": "600"
+                            }
+                    ],
+                    "body-md": [
+                            "16px",
+                            {
+                                    "lineHeight": "24px",
+                                    "fontWeight": "400"
+                            }
+                    ]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glow-gold {
+            box-shadow: inset 0 0 10px rgba(242, 202, 80, 0.2);
+        }
+        .scrim-gradient {
+            background: radial-gradient(circle at center, rgba(19, 19, 19, 0) 0%, rgba(14, 14, 14, 0.9) 100%);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background min-h-screen flex flex-col items-center justify-center relative overflow-hidden font-body-md">
+<!-- Background Gradient (Deep Amber / Green hint) -->
+<div class="absolute inset-0 bg-gradient-to-b from-[#0a1f0d] to-background opacity-80 z-0"></div>
+<div class="absolute inset-0 scrim-gradient z-0 pointer-events-none"></div>
+<!-- Main Content Canvas -->
+<main class="relative z-10 w-full max-w-[680px] px-container-padding-mobile md:px-container-padding-desktop flex flex-col items-center text-center">
+<!-- Status Indicator -->
+<div class="mb-section-gap">
+<span class="font-label-md text-label-md text-primary/80 tracking-[0.1em] uppercase">Take a moment to reflect...</span>
+</div>
+<!-- Spiritual Reminder Container -->
+<div class="w-full flex flex-col items-center space-y-8 mb-section-gap relative">
+<!-- Decorative line -->
+<div class="w-12 h-px bg-primary/30"></div>
+<!-- Arabic Ayah -->
+<div class="font-quote-arabic text-quote-arabic text-primary leading-loose text-center w-full max-w-lg" dir="rtl">
+                وَمَا الْحَيَاةُ الدُّنْيَا إِلَّا مَتَاعُ الْغُرُورِ
+            </div>
+<!-- English Translation -->
+<div class="font-headline-md text-headline-md text-on-surface-variant max-w-md mx-auto">
+                "And what is the worldly life except the enjoyment of delusion."
+            </div>
+<!-- Source Citation -->
+<div class="font-label-md text-label-md text-outline">
+                Surah Al Imran [3:185]
+            </div>
+<!-- Decorative line -->
+<div class="w-12 h-px bg-primary/30"></div>
+</div>
+<!-- Countdown Timer & Actions -->
+<div class="flex flex-col items-center space-y-8 mt-8">
+<!-- Circular Timer -->
+<div class="relative w-24 h-24 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<!-- Background Ring -->
+<circle class="text-surface-variant" cx="50" cy="50" fill="none" r="45" stroke="currentColor" stroke-width="2"></circle>
+<!-- Progress Ring -->
+<circle class="text-primary" cx="50" cy="50" fill="none" r="45" stroke="currentColor" stroke-dasharray="283" stroke-dashoffset="141.5" stroke-width="2"></circle>
+</svg>
+<div class="absolute inset-0 flex items-center justify-center flex-col">
+<span class="font-headline-sm text-headline-sm text-primary">15</span>
+<span class="font-label-md text-[10px] text-outline">SEC</span>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="w-full flex flex-col space-y-4 max-w-xs mx-auto">
+<!-- Primary Action (Go Back) - styled as the Nuur button but disabled state for this intercept -->
+<button class="w-full py-4 px-6 rounded-full bg-surface-variant text-on-surface-variant font-label-md text-label-md border border-outline-variant/30 opacity-50 cursor-not-allowed transition-all flex items-center justify-center space-x-2">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0;">arrow_back</span>
+<span>Go Back to Peace</span>
+</button>
+<!-- Secondary Action (Proceed) -->
+<button class="w-full py-3 px-6 rounded-full bg-transparent text-outline font-label-md text-label-md opacity-40 cursor-not-allowed hover:text-on-surface transition-colors">
+                    I still want to proceed
+                </button>
+</div>
+</div>
+</main>
+</body></html>

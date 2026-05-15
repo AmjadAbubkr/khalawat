@@ -36,5 +36,25 @@ class KhalawatPreferences(context: Context) {
         get() = prefs.getInt("disconnect_count", 0)
         set(value) = prefs.edit().putInt("disconnect_count", value).apply()
 
+    var userStoppedVpn: Boolean
+        get() = prefs.getBoolean("user_stopped_vpn", false)
+        set(value) = prefs.edit().putBoolean("user_stopped_vpn", value).apply()
+
+    var pendingInterventionDomain: String?
+        get() = prefs.getString("pending_intervention_domain", null)
+        set(value) = prefs.edit().putString("pending_intervention_domain", value).apply()
+
+    var pendingInterventionStage: String?
+        get() = prefs.getString("pending_intervention_stage", null)
+        set(value) = prefs.edit().putString("pending_intervention_stage", value).apply()
+
+    var pendingInterventionStartedAt: Long
+        get() = prefs.getLong("pending_intervention_started_at", 0L)
+        set(value) = prefs.edit().putLong("pending_intervention_started_at", value).apply()
+
+    var interventionLogResetVersion: Int
+        get() = prefs.getInt("intervention_log_reset_version", 0)
+        set(value) = prefs.edit().putInt("intervention_log_reset_version", value).apply()
+
     fun clear() = prefs.edit().clear().apply()
 }

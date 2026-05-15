@@ -21,11 +21,20 @@ interface EscalationStateDao {
     @Insert
     fun logOverride(entity: OverrideLogEntity)
 
+    @Insert
+    fun logIntervention(entity: InterventionLogEntity)
+
     @Query("SELECT * FROM override_log ORDER BY timestamp DESC")
     fun getOverrideLogs(): List<OverrideLogEntity>
 
+    @Query("SELECT COUNT(*) FROM intervention_log WHERE timestamp > :sinceTimestamp")
+    fun getInterventionCountSince(sinceTimestamp: Long): Int
+
     @Query("SELECT COUNT(*) FROM override_log WHERE timestamp > :sinceTimestamp")
     fun getOverrideCountSince(sinceTimestamp: Long): Int
+
+    @Query("DELETE FROM intervention_log")
+    fun clearInterventionLogs()
 
     @Query("DELETE FROM override_log")
     fun clearOverrideLogs()

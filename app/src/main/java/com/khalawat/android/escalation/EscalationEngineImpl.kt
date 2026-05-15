@@ -3,6 +3,7 @@ package com.khalawat.android.escalation
 import java.time.Clock
 import java.time.Duration
 import java.time.Instant
+import java.time.ZoneOffset
 
 class EscalationEngineImpl(
     private val clock: Clock
@@ -102,6 +103,18 @@ class EscalationEngineImpl(
             lastRequestTime = lastRequestTime,
             lastOverrideTime = lastOverrideTime
         )
+    }
+
+    override fun restore(
+        stage: EscalationStage,
+        lastRequestTimeMillis: Long,
+        lastOverrideTimeMillis: Long?,
+        cooldownEndTimeMillis: Long?
+    ) {
+        currentStage = stage
+        lastRequestTime = Instant.ofEpochMilli(lastRequestTimeMillis).atZone(ZoneOffset.UTC).toInstant()
+        lastOverrideTime = lastOverrideTimeMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toInstant() }
+        cooldownEndTime = cooldownEndTimeMillis?.let { Instant.ofEpochMilli(it).atZone(ZoneOffset.UTC).toInstant() }
     }
 
     override fun getCurrentStage(): EscalationStage = currentStage

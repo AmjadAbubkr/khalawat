@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>How It Works</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600&amp;family=Newsreader:wght@400;500;600&amp;family=Noto+Serif&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "inverse-primary": "#735c00",
+                        "primary": "#f2ca50",
+                        "on-surface": "#e5e2e1",
+                        "background": "#131313",
+                        "on-surface-variant": "#d0c5af",
+                        "surface-variant": "#353534",
+                        "error": "#ffb4ab",
+                        "on-secondary-fixed": "#0b2013",
+                        "inverse-on-surface": "#313030",
+                        "surface-container-low": "#1c1b1b",
+                        "secondary": "#b4cdb8",
+                        "on-error": "#690005",
+                        "surface-container-highest": "#353534",
+                        "outline": "#99907c",
+                        "on-tertiary-fixed-variant": "#3f465c",
+                        "on-primary": "#3c2f00",
+                        "secondary-fixed": "#d0e9d4",
+                        "surface-container-high": "#2a2a2a",
+                        "primary-fixed": "#ffe088",
+                        "on-primary-fixed-variant": "#574500",
+                        "surface-container-lowest": "#0e0e0e",
+                        "on-tertiary-container": "#3d455a",
+                        "on-primary-fixed": "#241a00",
+                        "tertiary-fixed-dim": "#bec6e0",
+                        "primary-container": "#d4af37",
+                        "surface": "#131313",
+                        "error-container": "#93000a",
+                        "primary-fixed-dim": "#e9c349",
+                        "on-tertiary-fixed": "#131b2e",
+                        "on-secondary-fixed-variant": "#364c3c",
+                        "tertiary": "#c6cee8",
+                        "tertiary-fixed": "#dae2fd",
+                        "on-tertiary": "#283044",
+                        "surface-bright": "#393939",
+                        "secondary-container": "#364c3c",
+                        "tertiary-container": "#abb2cc",
+                        "surface-tint": "#e9c349",
+                        "on-background": "#e5e2e1",
+                        "surface-container": "#201f1f",
+                        "inverse-surface": "#e5e2e1",
+                        "on-secondary": "#203527",
+                        "on-secondary-container": "#a3bba7",
+                        "on-primary-container": "#554300",
+                        "secondary-fixed-dim": "#b4cdb8",
+                        "on-error-container": "#ffdad6",
+                        "surface-dim": "#131313",
+                        "outline-variant": "#4d4635"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "section-gap": "32px",
+                        "container-padding-mobile": "20px",
+                        "container-padding-desktop": "40px",
+                        "base": "8px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "label-md": ["Manrope"],
+                        "body-lg": ["Manrope"],
+                        "quote-arabic": ["Noto Serif"],
+                        "headline-sm": ["Newsreader"],
+                        "headline-md": ["Newsreader"],
+                        "display-lg": ["Newsreader"],
+                        "body-md": ["Manrope"]
+                    },
+                    "fontSize": {
+                        "label-md": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "quote-arabic": ["24px", { "lineHeight": "40px", "fontWeight": "400" }],
+                        "headline-sm": ["22px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-md": ["28px", { "lineHeight": "36px", "fontWeight": "500" }],
+                        "display-lg": ["40px", { "lineHeight": "48px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen flex flex-col font-body-md antialiased overflow-x-hidden selection:bg-primary-container selection:text-on-primary-container">
+<!-- Top Navigation Placeholder for Context (Suppressed Nav Shell as per instructions, using a simple back button header) -->
+<header class="w-full flex items-center justify-between px-container-padding-mobile h-16 pt-4 shrink-0">
+<button class="flex items-center text-on-surface-variant hover:text-primary transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-full p-2">
+<span class="material-symbols-outlined text-2xl" data-icon="arrow_back" data-weight="fill" style="font-variation-settings: 'FILL' 1;">arrow_back</span>
+</button>
+<div class="flex space-x-2">
+<div class="w-2 h-2 rounded-full bg-surface-variant"></div>
+<div class="w-2 h-2 rounded-full bg-surface-variant"></div>
+<div class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(242,202,80,0.4)]"></div>
+</div>
+<div class="w-10"></div> <!-- Spacer for balance -->
+</header>
+<main class="flex-1 w-full max-w-[680px] mx-auto px-container-padding-mobile py-8 flex flex-col items-center">
+<div class="text-center w-full mb-12">
+<h1 class="font-display-lg text-display-lg text-primary mb-4 tracking-tight">How It Works</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-md mx-auto">Understanding the journey of intervention and reflection.</p>
+</div>
+<div class="w-full relative flex flex-col space-y-6 pb-24">
+<!-- Continuous Line -->
+<div class="absolute left-[23px] top-6 bottom-0 w-[2px] bg-surface-variant rounded-full hidden sm:block"></div>
+<!-- Step 1 -->
+<div class="relative flex flex-col sm:flex-row items-start group">
+<div class="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6 flex items-center justify-center w-12 h-12 rounded-full bg-surface-container border border-outline-variant/30 text-primary font-headline-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] z-10 transition-colors group-hover:border-primary/50 group-hover:bg-surface-container-high">
+                    1
+                </div>
+<div class="bg-surface-container-low rounded-2xl p-6 w-full border border-surface-variant/50 backdrop-blur-sm shadow-sm transition-all group-hover:-translate-y-1 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary/80" data-icon="vpn_lock">vpn_lock</span>
+                        Local VPN DNS Check
+                    </h3>
+<p class="text-on-surface-variant text-body-md">Your privacy is sacred. We use a local device-level VPN to filter DNS requests, ensuring your data never leaves your phone.</p>
+</div>
+</div>
+<!-- Step 2 -->
+<div class="relative flex flex-col sm:flex-row items-start group">
+<div class="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6 flex items-center justify-center w-12 h-12 rounded-full bg-surface-container border border-outline-variant/30 text-primary font-headline-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] z-10 transition-colors group-hover:border-primary/50 group-hover:bg-surface-container-high">
+                    2
+                </div>
+<div class="bg-surface-container-low rounded-2xl p-6 w-full border border-surface-variant/50 backdrop-blur-sm shadow-sm transition-all group-hover:-translate-y-1 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary/80" data-icon="auto_awesome">auto_awesome</span>
+                        Spiritual Intervention
+                    </h3>
+<p class="text-on-surface-variant text-body-md">Instead of a harsh block page, you are gently redirected to a calming, reflective space designed to disrupt negative momentum.</p>
+</div>
+</div>
+<!-- Step 3 -->
+<div class="relative flex flex-col sm:flex-row items-start group">
+<div class="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6 flex items-center justify-center w-12 h-12 rounded-full bg-surface-container border border-outline-variant/30 text-primary font-headline-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] z-10 transition-colors group-hover:border-primary/50 group-hover:bg-surface-container-high">
+                    3
+                </div>
+<div class="bg-surface-container-low rounded-2xl w-full border border-surface-variant/50 backdrop-blur-sm shadow-sm transition-all group-hover:-translate-y-1 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] overflow-hidden">
+<div class="h-1 w-full bg-gradient-to-r from-surface-variant to-primary/30"></div>
+<div class="p-6">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary/80" data-icon="menu_book">menu_book</span>
+                            Stage 1: The 15s Pause
+                        </h3>
+<p class="text-on-surface-variant text-body-md">A brief, mandatory pause featuring a carefully selected Quranic Ayah to provide immediate perspective and calm the mind.</p>
+</div>
+</div>
+</div>
+<!-- Step 4 -->
+<div class="relative flex flex-col sm:flex-row items-start group">
+<div class="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6 flex items-center justify-center w-12 h-12 rounded-full bg-surface-container border border-outline-variant/30 text-primary font-headline-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] z-10 transition-colors group-hover:border-primary/50 group-hover:bg-surface-container-high">
+                    4
+                </div>
+<div class="bg-surface-container-low rounded-2xl w-full border border-surface-variant/50 backdrop-blur-sm shadow-sm transition-all group-hover:-translate-y-1 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] overflow-hidden">
+<div class="h-1 w-full bg-gradient-to-r from-surface-variant to-primary/60"></div>
+<div class="p-6">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary/80" data-icon="air">air</span>
+                            Stage 2: 30s Breathing
+                        </h3>
+<p class="text-on-surface-variant text-body-md">Guided breathing exercises combined with silent Dhikr to lower heart rate and re-establish physical and spiritual presence.</p>
+</div>
+</div>
+</div>
+<!-- Step 5 -->
+<div class="relative flex flex-col sm:flex-row items-start group">
+<div class="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6 flex items-center justify-center w-12 h-12 rounded-full bg-surface-container border border-outline-variant/30 text-primary font-headline-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] z-10 transition-colors group-hover:border-primary/50 group-hover:bg-surface-container-high">
+                    5
+                </div>
+<div class="bg-surface-container-low rounded-2xl w-full border border-surface-variant/50 backdrop-blur-sm shadow-sm transition-all group-hover:-translate-y-1 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)] overflow-hidden relative">
+<!-- Subtle Glow -->
+<div class="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+<div class="h-1 w-full bg-gradient-to-r from-surface-variant to-primary"></div>
+<div class="p-6 relative z-10">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary/80" data-icon="lock">lock</span>
+                            Stage 3: 2-Min Hard Lock
+                        </h3>
+<p class="text-on-surface-variant text-body-md">If the urge persists, a firm 2-minute barrier is enacted, removing the immediate opportunity and allowing rational thought to return.</p>
+</div>
+</div>
+</div>
+<!-- Step 6 -->
+<div class="relative flex flex-col sm:flex-row items-start group">
+<div class="flex-shrink-0 mb-4 sm:mb-0 sm:mr-6 flex items-center justify-center w-12 h-12 rounded-full bg-surface-container border border-outline-variant/30 text-primary font-headline-md shadow-[inset_0_1px_1px_rgba(255,255,255,0.05)] z-10 transition-colors group-hover:border-primary/50 group-hover:bg-surface-container-high">
+                    6
+                </div>
+<div class="bg-surface-container-low rounded-2xl p-6 w-full border border-surface-variant/50 backdrop-blur-sm shadow-sm transition-all group-hover:-translate-y-1 group-hover:shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary/80" data-icon="hourglass_bottom">hourglass_bottom</span>
+                        10-Min Cooling
+                    </h3>
+<p class="text-on-surface-variant text-body-md">A final, gentle cooling period where access remains restricted, ensuring the mind has fully settled before returning to normal use.</p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Action Bar -->
+<div class="fixed bottom-0 left-0 w-full z-50 bg-background/90 backdrop-blur-xl border-t border-surface-variant/30 px-container-padding-mobile py-4 flex justify-between items-center max-w-[680px] left-1/2 -translate-x-1/2">
+<button class="font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors px-6 py-3 rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-surface-variant">
+            Back
+        </button>
+<button class="font-label-md text-label-md bg-primary text-on-primary hover:bg-primary-fixed-dim transition-colors px-8 py-3 rounded-full shadow-[0_0_15px_rgba(242,202,80,0.2)] focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background">
+            Next
+        </button>
+</div>
+</body></html>

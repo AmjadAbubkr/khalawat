@@ -101,6 +101,7 @@ class SessionRepositoryTest {
 
 class FakeSessionRepository : SessionRepository {
     private var state: PersistentEscalationState? = null
+    private val interventionLogs = mutableListOf<Triple<String, EscalationStage, Long>>()
     private val overrideLogs = mutableListOf<Triple<String, EscalationStage, Long>>()
 
     override fun loadState(): PersistentEscalationState? = state
@@ -111,12 +112,21 @@ class FakeSessionRepository : SessionRepository {
 
     override fun clearState() { state = null }
 
+    override fun logIntervention(domain: String, stage: EscalationStage, timestamp: Long) {
+        interventionLogs.add(Triple(domain, stage, timestamp))
+    }
+
     override fun logOverride(domain: String, stage: EscalationStage, timestamp: Long) {
         overrideLogs.add(Triple(domain, stage, timestamp))
     }
 
+    override fun getInterventionCountSince(sinceTimestamp: Long): Int =
+        interventionLogs.count { it.third > sinceTimestamp }
+
     override fun getOverrideCountSince(sinceTimestamp: Long): Int =
         overrideLogs.count { it.third > sinceTimestamp }
+
+    override fun clearInterventionLogs() { interventionLogs.clear() }
 
     override fun clearOverrideLogs() { overrideLogs.clear() }
 }

@@ -21,6 +21,12 @@ interface EscalationEngine {
     fun onBlockedRequest(domain: String): EscalationState
     fun override(domain: String): EscalationState
     fun onStage3Complete(domain: String): EscalationState
+    fun restore(
+        stage: EscalationStage,
+        lastRequestTimeMillis: Long,
+        lastOverrideTimeMillis: Long?,
+        cooldownEndTimeMillis: Long?
+    )
     fun getCurrentStage(): EscalationStage
     fun getCooldownEndTime(): Instant?
     fun getLastRequestTime(): Instant

@@ -5,23 +5,47 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Khalawat — Protected</title>
 <style>
+/*--- Design System: Light = warm parchment / sage-gold ; Dark = charcoal / gold ---*/
+:root{
+  --bg:#fcf8f7;--on-bg:#1c1b1b;--primary:#5d5f5b;--primary-fixed:#e3e3de;
+  --surface:#fcf8f7;--on-surface:#1c1b1b;--variant:#e5e2e1;--variant-text:#454843;
+  --gold:#d4af37;--gold-dim:#e9c349;--error:#ba1a1a;--secondary:#4d644d;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#131313;--on-bg:#e5e2e1;--primary:#f2ca50;--primary-fixed:#ffe088;
+    --surface:#131313;--on-surface:#e5e2e1;--variant:#353534;--variant-text:#d0c5af;
+    --gold:#f2ca50;--gold-dim:#ffe088;--error:#ffb4ab;--secondary:#b4cdb8;
+  }
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{background:#041207;color:#e8f5e9;font-family:'Segoe UI',system-ui,-apple-system,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center}
+html,body{height:100%}
+body{
+  background:var(--bg);color:var(--on-bg);
+  font-family:'Newsreader','Georgia',serif;
+  min-height:100vh;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;padding:24px;text-align:center;
+}
 .container{max-width:420px;width:100%}
 .lock-icon{font-size:4rem;margin-bottom:24px;opacity:0.8}
-.message-arabic{font-size:1.4rem;color:#a5d6a7;margin-bottom:12px;font-family:'Traditional Arabic','Scheherazade New',serif;direction:rtl;line-height:1.8}
-.message-text{font-size:1.1rem;line-height:1.7;color:#c8e6c9;margin-bottom:32px}
-.timer-display{font-size:3rem;font-weight:700;color:#4caf50;margin-bottom:8px;letter-spacing:2px}
-.timer-label{font-size:0.85rem;color:#81c784;margin-bottom:40px;text-transform:uppercase;letter-spacing:1px}
+.message-arabic{font-size:1.3rem;color:var(--primary);margin-bottom:12px;font-family:'Scheherazade New','Traditional Arabic',serif;direction:rtl;line-height:1.8}
+.message-text{font-size:1rem;line-height:1.7;color:var(--variant-text);margin-bottom:32px;font-family:'Manrope',sans-serif}
+.timer-display{font-size:3rem;font-weight:700;color:var(--gold);margin-bottom:8px;letter-spacing:2px;font-family:'Newsreader',serif}
+.timer-label{font-size:0.8rem;color:var(--variant-text);margin-bottom:40px;text-transform:uppercase;letter-spacing:1px;font-family:'Manrope',sans-serif}
 .suggestions{display:flex;flex-direction:column;gap:16px;margin-bottom:32px}
-.suggestion-card{background:rgba(46,125,50,0.1);border:1px solid rgba(76,175,80,0.15);border-radius:16px;padding:20px;display:flex;align-items:center;gap:16px;text-align:left;transition:all 0.3s}
+.suggestion-card{
+  background:color-mix(in srgb,var(--variant)60%,transparent);border:1px solid color-mix(in srgb,var(--variant-text)10%,transparent);
+  border-radius:12px;padding:20px;display:flex;align-items:center;gap:16px;
+  text-align:left;transition:all 0.3s;font-family:'Manrope',sans-serif;
+}
+.suggestion-card:hover{background:color-mix(in srgb,var(--gold)5%,var(--variant));border-color:color-mix(in srgb,var(--gold)20%,transparent)}
 .suggestion-icon{font-size:2rem;min-width:40px;text-align:center}
-.suggestion-text{font-size:1rem;color:#c8e6c9;line-height:1.5}
-.suggestion-text strong{color:#fff;display:block;margin-bottom:2px}
-.btn{padding:16px 32px;border-radius:12px;font-size:1rem;cursor:pointer;border:none;font-weight:600;transition:all 0.3s;width:100%;max-width:280px;margin:0 auto}
-.btn-primary{background:#2e7d32;color:#fff}
-.btn-primary:disabled{background:#1a2a1a;color:#3a5a3a;cursor:not-allowed}
-.unlock-text{font-size:0.85rem;color:#66bb6a;margin-top:16px;opacity:0;transition:opacity 0.5s}
+.suggestion-text{font-size:0.95rem;color:var(--variant-text);line-height:1.5}
+.suggestion-text strong{color:var(--on-surface);display:block;margin-bottom:2px}
+.btn{padding:16px 32px;border-radius:9999px;font-size:0.95rem;cursor:pointer;border:none;font-weight:600;transition:all 0.3s;width:100%;max-width:280px;margin:0 auto;font-family:'Manrope',sans-serif}
+.btn-primary{background:var(--gold);color:var(--bg)}
+.btn-primary:disabled{background:var(--variant);color:var(--variant-text);cursor:not-allowed;opacity:0.5}
+.unlock-text{font-size:0.8rem;color:var(--variant-text);margin-top:16px;opacity:0;transition:opacity 0.5s;font-family:'Manrope',sans-serif}
 .unlock-text.visible{opacity:1}
 </style>
 </head>
@@ -29,7 +53,7 @@ body{background:#041207;color:#e8f5e9;font-family:'Segoe UI',system-ui,-apple-sy
 <div class="container">
   <div class="lock-icon">🔒</div>
   <div class="message-arabic">أَنْتَ وَضَعْتَ هَذَا الْقَفْلَ لِنَفْسِكَ</div>
-  <div class="message-text">You chose this lock for yourself.<br>It's not punishment — it's protection.</div>
+  <div class="message-text">You placed this lock on yourself.<br>It's not punishment — it's protection.</div>
   <div class="timer-display" id="lockTimer">2:00</div>
   <div class="timer-label">remaining</div>
   <div class="suggestions">

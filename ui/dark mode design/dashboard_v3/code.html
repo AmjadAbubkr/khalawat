@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Khalawat - Dashboard</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Newsreader -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind Config -->
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "surface-container": "#f1edec",
+                        "on-error-container": "#93000a",
+                        "secondary-fixed-dim": "#b4cdb1",
+                        "on-primary-container": "#6f706c",
+                        "on-secondary-container": "#536a53",
+                        "surface-dim": "#ddd9d8",
+                        "outline-variant": "#c5c7c1",
+                        "inverse-surface": "#313030",
+                        "on-secondary": "#ffffff",
+                        "on-tertiary": "#ffffff",
+                        "tertiary-fixed": "#ffe088",
+                        "surface-bright": "#fcf8f7",
+                        "secondary-container": "#cfeacc",
+                        "error-container": "#ffdad6",
+                        "surface": "#fcf8f7",
+                        "tertiary": "#735c00",
+                        "on-tertiary-fixed": "#241a00",
+                        "on-secondary-fixed-variant": "#364c36",
+                        "primary-fixed-dim": "#c6c7c2",
+                        "on-background": "#1c1b1b",
+                        "tertiary-container": "#fff4de",
+                        "surface-tint": "#5d5f5b",
+                        "on-primary-fixed-variant": "#454744",
+                        "surface-container-high": "#ebe7e6",
+                        "primary-fixed": "#e3e3de",
+                        "on-tertiary-container": "#886c00",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "outline": "#757873",
+                        "on-tertiary-fixed-variant": "#574500",
+                        "secondary-fixed": "#cfeacc",
+                        "on-primary-fixed": "#1a1c19",
+                        "primary-container": "#f5f5f0",
+                        "tertiary-fixed-dim": "#e9c349",
+                        "background": "#fcf8f7",
+                        "on-surface-variant": "#454843",
+                        "inverse-primary": "#c6c7c2",
+                        "on-surface": "#1c1b1b",
+                        "primary": "#5d5f5b",
+                        "on-error": "#ffffff",
+                        "secondary": "#4d644d",
+                        "surface-container-low": "#f7f3f2",
+                        "surface-container-highest": "#e5e2e1",
+                        "error": "#ba1a1a",
+                        "surface-variant": "#e5e2e1",
+                        "inverse-on-surface": "#f4f0ef",
+                        "on-secondary-fixed": "#0b200e"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "container-max": "1120px",
+                        "unit": "8px",
+                        "margin-mobile": "20px",
+                        "gutter": "24px",
+                        "margin-desktop": "64px"
+                    },
+                    fontFamily: {
+                        "headline-lg-mobile": ["Newsreader"],
+                        "body-lg": ["Newsreader"],
+                        "label-sm": ["Newsreader"],
+                        "headline-md": ["Newsreader"],
+                        "body-md": ["Newsreader"],
+                        "label-lg": ["Newsreader"],
+                        "display": ["Newsreader"],
+                        "headline-lg": ["Newsreader"]
+                    },
+                    fontSize: {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "36px", "fontWeight": "500" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.03em", "fontWeight": "500" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "500" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "display": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        /* Smooth rendering for elegant typography */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col relative selection:bg-tertiary-container selection:text-secondary">
+<!-- TopAppBar -->
+<header class="w-full top-0 bg-background dark:bg-background border-b border-secondary/10 dark:border-secondary-fixed-dim/10 z-40 sticky">
+<div class="flex items-center justify-between px-margin-mobile md:px-margin-desktop py-4 w-full max-w-container-max mx-auto">
+<button class="text-secondary dark:text-secondary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">menu</span>
+</button>
+<h1 class="font-display text-headline-lg text-secondary dark:text-secondary-fixed-dim tracking-tight">
+                Khalawat
+            </h1>
+<button class="text-secondary dark:text-secondary-fixed-dim hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow w-full max-w-container-max mx-auto px-margin-mobile md:px-margin-desktop py-12 md:py-24 flex flex-col items-center pb-32">
+<!-- Status Indicator Hero Area -->
+<section class="flex flex-col items-center justify-center mb-16 md:mb-24 w-full">
+<!-- Large Circular Status Indicator -->
+<div class="relative w-64 h-64 md:w-80 md:h-80 flex items-center justify-center rounded-full border border-secondary/10 bg-surface-container-lowest shadow-[0_0_40px_-15px_rgba(77,100,77,0.1)]">
+<!-- Inner Decorative Ring -->
+<div class="absolute inset-4 rounded-full border border-tertiary-fixed-dim/40 border-dashed"></div>
+<!-- Content -->
+<div class="flex flex-col items-center justify-center space-y-4 z-10">
+<span class="material-symbols-outlined text-[72px] md:text-[88px] text-tertiary-fixed-dim" style="font-variation-settings: 'FILL' 1;">shield</span>
+<h2 class="font-display text-headline-lg md:text-display text-secondary tracking-tight">Protected</h2>
+</div>
+</div>
+<p class="mt-8 text-center font-body-lg text-on-surface-variant max-w-sm">
+                Your environment is currently shielded. Stillness is maintained.
+            </p>
+</section>
+<!-- Stats Bento Grid -->
+<section class="w-full max-w-2xl grid grid-cols-1 md:grid-cols-2 gap-gutter mb-16">
+<!-- Interventions Card -->
+<div class="bg-surface rounded-lg border border-secondary/10 border-t-2 border-t-tertiary-fixed-dim p-8 flex flex-col items-center justify-center text-center group hover:bg-surface-container-low transition-colors duration-300">
+<span class="material-symbols-outlined text-secondary/40 mb-4 text-[32px] group-hover:text-secondary transition-colors duration-300">front_hand</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Interventions</span>
+<span class="font-display text-display text-secondary leading-none">3</span>
+</div>
+<!-- Current Level Card -->
+<div class="bg-surface rounded-lg border border-secondary/10 border-t-2 border-t-tertiary-fixed-dim p-8 flex flex-col items-center justify-center text-center group hover:bg-surface-container-low transition-colors duration-300">
+<span class="material-symbols-outlined text-secondary/40 mb-4 text-[32px] group-hover:text-secondary transition-colors duration-300">ac_unit</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-widest mb-2">Current Level</span>
+<span class="font-display text-headline-lg text-secondary leading-tight mt-2">Cooling</span>
+</div>
+</section>
+<!-- Prominent Action Area -->
+<section class="w-full max-w-md mt-auto">
+<button class="w-full bg-tertiary-fixed-dim text-secondary font-label-lg text-label-lg py-4 px-8 rounded-lg shadow-sm hover:opacity-90 active:scale-[0.98] transition-all duration-200 flex items-center justify-center space-x-3 border border-transparent focus:outline-none focus:ring-2 focus:ring-secondary/20">
+<span class="material-symbols-outlined text-[20px]">power_settings_new</span>
+<span>Disable Khalawat</span>
+</button>
+</section>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-4 pb-safe bg-surface dark:bg-surface-container-highest md:hidden border-t border-secondary/10 dark:border-secondary-fixed-dim/10">
+<!-- Peace (Active Tab) -->
+<button class="flex flex-col items-center justify-center bg-tertiary-container dark:bg-tertiary text-on-tertiary-container dark:text-on-tertiary rounded-xl px-4 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container active:scale-95 transition-transform duration-200 w-24">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">spa</span>
+<span class="font-label-sm text-label-sm mt-1">Peace</span>
+</button>
+<!-- Library (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container active:scale-95 transition-transform duration-200 w-24">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="font-label-sm text-label-sm mt-1">Library</span>
+</button>
+<!-- Self (Inactive) -->
+<button class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant px-4 py-1 hover:bg-surface-container-low dark:hover:bg-surface-container active:scale-95 transition-transform duration-200 w-24">
+<span class="material-symbols-outlined">person</span>
+<span class="font-label-sm text-label-sm mt-1">Self</span>
+</button>
+</nav>
+</body></html>

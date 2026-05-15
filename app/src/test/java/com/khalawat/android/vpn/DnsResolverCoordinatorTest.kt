@@ -96,6 +96,17 @@ class DnsResolverCoordinatorTest {
         assertThat(result.escalationStage).isEqualTo(EscalationStage.STAGE_3)
     }
 
+    @Test
+    fun `repeated blocked requests within debounce window do not re-escalate or relog`() {
+        fakeDnsProxy.nextResponse = DnsResponse.Blocked(InetAddress.getByName("127.0.0.1"))
+
+        coordinator.handleDnsPacket(buildQuery("bad.com"))
+        coordinator.handleDnsPacket(buildQuery("bad.com"))
+
+        assertThat(fakeEscalationEngine.blockedDomains).containsExactly("bad.com")
+        assertThat(fakeSessionRepo.interventionLogs).hasSize(1)
+    }
+
     // --- Override flow ---
 
     @Test
@@ -235,6 +246,15 @@ class FakeEscalationEngine : EscalationEngine {
         )
     }
 
+    override fun restore(
+        stage: EscalationStage,
+        lastRequestTimeMillis: Long,
+        lastOverrideTimeMillis: Long?,
+        cooldownEndTimeMillis: Long?
+    ) {
+        nextStage = stage
+    }
+
     override fun getCurrentStage(): EscalationStage = nextStage
     override fun getCooldownEndTime(): Instant? = currentCooldown
     override fun getLastRequestTime(): Instant = currentTime
@@ -244,15 +264,22 @@ class FakeEscalationEngine : EscalationEngine {
 class FakeSessionRepoForVpn : SessionRepository {
     var savedState: PersistentEscalationState? = null
     var cleared = false
+    val interventionLogs = mutableListOf<Triple<String, EscalationStage, Long>>()
     val overrideLogs = mutableListOf<Triple<String, EscalationStage, Long>>()
 
     override fun loadState(): PersistentEscalationState? = savedState
     override fun saveState(state: PersistentEscalationState) { savedState = state }
     override fun clearState() { cleared = true; savedState = null }
+    override fun logIntervention(domain: String, stage: EscalationStage, timestamp: Long) {
+        interventionLogs.add(Triple(domain, stage, timestamp))
+    }
     override fun logOverride(domain: String, stage: EscalationStage, timestamp: Long) {
         overrideLogs.add(Triple(domain, stage, timestamp))
     }
+    override fun getInterventionCountSince(sinceTimestamp: Long): Int =
+        interventionLogs.count { it.third > sinceTimestamp }
     override fun getOverrideCountSince(sinceTimestamp: Long): Int =
         overrideLogs.count { it.third > sinceTimestamp }
+    override fun clearInterventionLogs() { interventionLogs.clear() }
     override fun clearOverrideLogs() { overrideLogs.clear() }
 }
