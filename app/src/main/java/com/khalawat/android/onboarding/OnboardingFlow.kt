@@ -115,14 +115,14 @@ fun OnboardingFlow(
                     val dir = if (targetState.ordinal > initialState.ordinal) 1 else -1
                     (
                         slideInHorizontally(
-                            animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
-                        ) { fullWidth -> (fullWidth * 0.08f * dir).toInt() } +
-                            fadeIn(animationSpec = tween(durationMillis = 220))
+                            animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing)
+                        ) { fullWidth -> (fullWidth * 0.04f * dir).toInt() } +
+                            fadeIn(animationSpec = tween(durationMillis = 180))
                         ) togetherWith (
                         slideOutHorizontally(
-                            animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing)
-                        ) { fullWidth -> (-fullWidth * 0.05f * dir).toInt() } +
-                            fadeOut(animationSpec = tween(durationMillis = 180))
+                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                        ) { fullWidth -> (-fullWidth * 0.03f * dir).toInt() } +
+                            fadeOut(animationSpec = tween(durationMillis = 150))
                         )
                 },
                 label = "onboarding_page"
@@ -365,7 +365,7 @@ private fun HowItWorksScreen() {
 
         val steps = listOf(
             Step("Local VPN", "Checks DNS requests locally", Icons.Default.CloudOff),
-            Step("Blocking", "Blocked sites show an intervention page", Icons.Default.AutoAwesome),
+            Step("Blocking", "Blocked sites trigger an intervention flow", Icons.Default.AutoAwesome),
             Step("Stage 1", "15-second pause with a Quran Ayah", Icons.Default.Pause),
             Step("Stage 2", "30-second breathing + Dhikr", Icons.Default.Air),
             Step("Stage 3", "2-minute hard lock", Icons.Default.Lock),
@@ -595,28 +595,9 @@ private fun VpnPermissionScreen(
     ) {
         when {
             isActivating -> {
-                val infiniteTransition = rememberInfiniteTransition(label = "activating_pulse")
-                val pulseScale by infiniteTransition.animateFloat(
-                    initialValue = 0.9f,
-                    targetValue = 1.1f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(800, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse
-                    ),
-                    label = "pulse_scale"
-                )
-                val pulseAlpha by infiniteTransition.animateFloat(
-                    initialValue = 0.2f,
-                    targetValue = 0.5f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(800, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse
-                    ),
-                    label = "pulse_alpha"
-                )
                 Box(
-                    modifier = Modifier.size(100.dp).scale(pulseScale).background(
-                        MaterialTheme.colorScheme.primary.copy(alpha = pulseAlpha),
+                    modifier = Modifier.size(100.dp).background(
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
                         CircleShape
                     ),
                     contentAlignment = Alignment.Center,
@@ -642,24 +623,14 @@ private fun VpnPermissionScreen(
                 )
             }
             isActivated -> {
-                val activatedGlow = rememberInfiniteTransition(label = "activated_glow")
                 val checkScale by animateFloatAsState(
                     targetValue = 1f,
-                    animationSpec = tween(600),
+                    animationSpec = tween(260),
                     label = "check_scale"
-                )
-                val glowAlpha by activatedGlow.animateFloat(
-                    initialValue = 0.3f,
-                    targetValue = 0.1f,
-                    animationSpec = infiniteRepeatable(
-                        animation = tween(1500, easing = LinearEasing),
-                        repeatMode = RepeatMode.Reverse
-                    ),
-                    label = "glow"
                 )
                 Box(
                     modifier = Modifier.size(100.dp).background(
-                        MaterialTheme.colorScheme.primary.copy(alpha = glowAlpha),
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                         CircleShape
                     ),
                     contentAlignment = Alignment.Center,

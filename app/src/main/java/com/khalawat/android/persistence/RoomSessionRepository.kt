@@ -60,6 +60,10 @@ class RoomSessionRepository(private val dao: EscalationStateDao) : SessionReposi
         return dao.getOverrideCountSince(sinceTimestamp)
     }
 
+    override fun clearInterventionLogs() {
+        dao.clearInterventionLogs()
+    }
+
     override fun clearOverrideLogs() {
         dao.clearOverrideLogs()
     }

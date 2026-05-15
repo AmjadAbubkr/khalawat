@@ -96,6 +96,17 @@ class DnsResolverCoordinatorTest {
         assertThat(result.escalationStage).isEqualTo(EscalationStage.STAGE_3)
     }
 
+    @Test
+    fun `repeated blocked requests within debounce window do not re-escalate or relog`() {
+        fakeDnsProxy.nextResponse = DnsResponse.Blocked(InetAddress.getByName("127.0.0.1"))
+
+        coordinator.handleDnsPacket(buildQuery("bad.com"))
+        coordinator.handleDnsPacket(buildQuery("bad.com"))
+
+        assertThat(fakeEscalationEngine.blockedDomains).containsExactly("bad.com")
+        assertThat(fakeSessionRepo.interventionLogs).hasSize(1)
+    }
+
     // --- Override flow ---
 
     @Test
@@ -269,5 +280,6 @@ class FakeSessionRepoForVpn : SessionRepository {
         interventionLogs.count { it.third > sinceTimestamp }
     override fun getOverrideCountSince(sinceTimestamp: Long): Int =
         overrideLogs.count { it.third > sinceTimestamp }
+    override fun clearInterventionLogs() { interventionLogs.clear() }
     override fun clearOverrideLogs() { overrideLogs.clear() }
 }

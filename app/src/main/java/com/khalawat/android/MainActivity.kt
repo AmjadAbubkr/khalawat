@@ -1,7 +1,9 @@
 package com.khalawat.android
 
+import android.Manifest
 import android.content.Intent
 import android.app.NotificationManager
+import android.content.pm.PackageManager
 import android.os.Build
 import android.net.VpnService
 import android.os.Bundle
@@ -51,6 +53,10 @@ class MainActivity : ComponentActivity() {
     private val antiTamperState = AntiTamperState()
     private var isVpnActiveState by mutableStateOf(false)
 
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
+
     private val vpnPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -94,11 +100,14 @@ class MainActivity : ComponentActivity() {
         }
         prefs = KhalawatPreferences(this)
         sessionRepo = RoomSessionRepository(AppDatabase.getInstance(this).escalationStateDao())
+        maybeResetInflatedInterventionLogs()
+        maybeRequestNotificationPermission()
         isVpnActiveState = prefs.isVpnActive
         onboardingState.changeLanguage(parseLanguage(prefs.selectedLanguage))
 
         prefs.companionPin?.let { antiTamperState.setCompanionPinRequired(it) }
         antiTamperState.restoreDisconnectCount(prefs.disconnectCount)
+        handleInterventionIntent(intent)
         restorePendingIntervention()
         refreshDashboardSnapshot()
 
@@ -137,6 +146,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        maybeRequestNotificationPermission()
         if (prefs.isOnboardingComplete) {
             val vpnActive = KhalawatVpnService.isRunning
             if (isVpnActiveState != vpnActive) {
@@ -152,6 +162,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleInterventionIntent(intent)
+        restorePendingIntervention()
     }
 
     override fun onDestroy() {
@@ -244,6 +261,40 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun maybeRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val granted = checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+        if (!granted) {
+            notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
+
+    private fun maybeResetInflatedInterventionLogs() {
+        if (prefs.interventionLogResetVersion >= 1) return
+        lifecycleScope.launch(Dispatchers.IO) {
+            sessionRepo.clearInterventionLogs()
+            prefs.interventionLogResetVersion = 1
+            withContext(Dispatchers.Main) {
+                KhalawatRuntimeState.updateDashboard(DashboardSnapshot())
+            }
+        }
+    }
+
+    private fun handleInterventionIntent(intent: Intent?) {
+        if (intent?.action != KhalawatVpnService.ACTION_VIEW_INTERVENTION) return
+        val domain = intent.getStringExtra("domain").orEmpty()
+        val stage = intent.getStringExtra("stage").orEmpty()
+        if (domain.isNotBlank()) {
+            prefs.pendingInterventionDomain = domain
+        }
+        if (stage.isNotBlank()) {
+            prefs.pendingInterventionStage = stage
+        }
+        if (prefs.pendingInterventionStartedAt == 0L) {
+            prefs.pendingInterventionStartedAt = System.currentTimeMillis()
+        }
+    }
+
     private fun restorePendingIntervention() {
         val stageName = prefs.pendingInterventionStage ?: return
         val domain = prefs.pendingInterventionDomain ?: return
@@ -322,14 +373,14 @@ fun KhalawatApp(
             val direction = if (toIdx > fromIdx) 1 else -1
             (
                 slideInHorizontally(
-                    animationSpec = tween(durationMillis = 320, easing = FastOutSlowInEasing)
-                ) { fullWidth -> (fullWidth * 0.08f * direction).toInt() } +
-                    fadeIn(animationSpec = tween(durationMillis = 220))
+                    animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing)
+                ) { fullWidth -> (fullWidth * 0.04f * direction).toInt() } +
+                    fadeIn(animationSpec = tween(durationMillis = 180))
                 ) togetherWith (
                 slideOutHorizontally(
-                    animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing)
-                ) { fullWidth -> (-fullWidth * 0.05f * direction).toInt() } +
-                    fadeOut(animationSpec = tween(durationMillis = 180))
+                    animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                ) { fullWidth -> (-fullWidth * 0.03f * direction).toInt() } +
+                    fadeOut(animationSpec = tween(durationMillis = 150))
                 )
         },
         label = "screen_transition"

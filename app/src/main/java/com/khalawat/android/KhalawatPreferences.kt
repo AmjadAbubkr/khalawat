@@ -52,5 +52,9 @@ class KhalawatPreferences(context: Context) {
         get() = prefs.getLong("pending_intervention_started_at", 0L)
         set(value) = prefs.edit().putLong("pending_intervention_started_at", value).apply()
 
+    var interventionLogResetVersion: Int
+        get() = prefs.getInt("intervention_log_reset_version", 0)
+        set(value) = prefs.edit().putInt("intervention_log_reset_version", value).apply()
+
     fun clear() = prefs.edit().clear().apply()
 }

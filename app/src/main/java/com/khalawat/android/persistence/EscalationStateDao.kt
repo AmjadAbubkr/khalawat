@@ -33,6 +33,9 @@ interface EscalationStateDao {
     @Query("SELECT COUNT(*) FROM override_log WHERE timestamp > :sinceTimestamp")
     fun getOverrideCountSince(sinceTimestamp: Long): Int
 
+    @Query("DELETE FROM intervention_log")
+    fun clearInterventionLogs()
+
     @Query("DELETE FROM override_log")
     fun clearOverrideLogs()
 }

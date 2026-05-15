@@ -4,9 +4,13 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Intent
+import android.os.Build
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat
 import com.khalawat.android.blocklist.BlocklistStoreImpl
 import com.khalawat.android.KhalawatPreferences
 import com.khalawat.android.MainActivity
@@ -54,9 +58,11 @@ class KhalawatVpnService : VpnService() {
         const val ACTION_STOP = "com.khalawat.android.action.STOP_VPN"
         const val ACTION_OVERRIDE_INTERVENTION = "com.khalawat.android.action.OVERRIDE_INTERVENTION"
         const val ACTION_COMPLETE_STAGE_3 = "com.khalawat.android.action.COMPLETE_STAGE_3"
+        const val ACTION_VIEW_INTERVENTION = "com.khalawat.android.action.VIEW_INTERVENTION"
         const val ACTION_VPN_STARTED = "com.khalawat.android.action.VPN_STARTED"
         const val ACTION_VPN_STOPPED = "com.khalawat.android.action.VPN_STOPPED"
         const val NOTIFICATION_CHANNEL_ID = "khalawat_vpn"
+        const val INTERVENTION_CHANNEL_ID = "khalawat_intervention"
         const val NOTIFICATION_ID = 1
         const val INTERVENTION_NOTIFICATION_ID = 2
         private const val TAG = "KhalawatVpn"
@@ -82,7 +88,7 @@ class KhalawatVpnService : VpnService() {
 
     override fun onCreate() {
         super.onCreate()
-        createNotificationChannel()
+        createNotificationChannels()
         prefs = KhalawatPreferences(this)
         spiritualContent = SpiritualContentProvider.get(this)
         val blocklistStore = BlocklistStoreImpl()
@@ -305,8 +311,8 @@ class KhalawatVpnService : VpnService() {
         return buildResponsePacket(originalPacket, dnsResponse)
     }
 
-    private fun createNotificationChannel() {
-        val channel = NotificationChannel(
+    private fun createNotificationChannels() {
+        val vpnChannel = NotificationChannel(
             NOTIFICATION_CHANNEL_ID,
             "Khalawat VPN",
             NotificationManager.IMPORTANCE_LOW
@@ -314,8 +320,20 @@ class KhalawatVpnService : VpnService() {
             description = "Shows when Khalawat is actively protecting your device"
             setShowBadge(false)
         }
+        val interventionChannel = NotificationChannel(
+            INTERVENTION_CHANNEL_ID,
+            "Khalawat interventions",
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = "Urgent intervention prompts when blocked content is detected"
+            lockscreenVisibility = android.app.Notification.VISIBILITY_PUBLIC
+            setShowBadge(true)
+        }
         getSystemService(NotificationManager::class.java)
-            .createNotificationChannel(channel)
+            .apply {
+                createNotificationChannel(vpnChannel)
+                createNotificationChannel(interventionChannel)
+            }
     }
 
     private fun startForegroundNotification() {
@@ -379,6 +397,7 @@ class KhalawatVpnService : VpnService() {
         KhalawatRuntimeState.showIntervention(state)
         syncDashboardState()
         showInterventionNotification(state)
+        launchInterventionUi(state)
     }
 
     private fun buildOverlayState(
@@ -438,8 +457,12 @@ class KhalawatVpnService : VpnService() {
     }
 
     private fun showInterventionNotification(state: InterventionOverlayState) {
+        if (!notificationsEnabled()) return
         val openIntent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            action = ACTION_VIEW_INTERVENTION
+            putExtra("domain", state.domain)
+            putExtra("stage", state.stage.name)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val pendingIntent = PendingIntent.getActivity(
             this,
@@ -447,15 +470,41 @@ class KhalawatVpnService : VpnService() {
             openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        val notification = android.app.Notification.Builder(this, NOTIFICATION_CHANNEL_ID)
+        val notification = NotificationCompat.Builder(this, INTERVENTION_CHANNEL_ID)
             .setContentTitle(state.title)
-            .setContentText("Blocked: ${state.domain}")
+            .setContentText("Blocked request detected for ${state.domain}")
             .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_ALARM)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setAutoCancel(false)
+            .setOngoing(true)
             .build()
-        getSystemService(NotificationManager::class.java)
+        NotificationManagerCompat.from(this)
             .notify(INTERVENTION_NOTIFICATION_ID, notification)
+    }
+
+    private fun launchInterventionUi(state: InterventionOverlayState) {
+        val intent = Intent(this, MainActivity::class.java).apply {
+            action = ACTION_VIEW_INTERVENTION
+            putExtra("domain", state.domain)
+            putExtra("stage", state.stage.name)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        }
+        kotlin.runCatching { startActivity(intent) }
+            .onFailure { Log.w(TAG, "Unable to launch intervention UI", it) }
+    }
+
+    private fun notificationsEnabled(): Boolean {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            val granted = ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+            if (!granted) return false
+        }
+        return NotificationManagerCompat.from(this).areNotificationsEnabled()
     }
 
     private fun handleInterventionOverride(domain: String) {

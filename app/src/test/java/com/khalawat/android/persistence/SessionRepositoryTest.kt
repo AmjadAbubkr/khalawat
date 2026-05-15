@@ -126,5 +126,7 @@ class FakeSessionRepository : SessionRepository {
     override fun getOverrideCountSince(sinceTimestamp: Long): Int =
         overrideLogs.count { it.third > sinceTimestamp }
 
+    override fun clearInterventionLogs() { interventionLogs.clear() }
+
     override fun clearOverrideLogs() { overrideLogs.clear() }
 }

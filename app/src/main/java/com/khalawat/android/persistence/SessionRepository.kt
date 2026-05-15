@@ -25,5 +25,6 @@ interface SessionRepository {
     fun logOverride(domain: String, stage: EscalationStage, timestamp: Long)
     fun getInterventionCountSince(sinceTimestamp: Long): Int
     fun getOverrideCountSince(sinceTimestamp: Long): Int
+    fun clearInterventionLogs()
     fun clearOverrideLogs()
 }
